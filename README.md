@@ -1,2 +1,2 @@
 # npc_ric
-могу
+# test push
