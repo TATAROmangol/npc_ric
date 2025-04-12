@@ -14,7 +14,7 @@ type Migrator struct{
 
 //dirPath - dir with migrate files
 func New(dirPath string, cfg Config) (*Migrator, error){
-	m, err := migrate.New(dirPath, cfg.address)
+	m, err := migrate.New(dirPath, cfg.GetConnString())
 	if err != nil{
 		return nil, fmt.Errorf("failed create migrator, err: %v", err)
 	}
