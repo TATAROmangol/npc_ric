@@ -39,3 +39,13 @@ func AppendCtx(ctx context.Context, key string, val any) context.Context {
     v = append(v, attr)
     return context.WithValue(ctx, log_fields, v)
 }
+
+func SwapContext(ctxWithLogger, other context.Context) context.Context {
+    l := GetFromCtx(ctxWithLogger)
+
+    if v, ok := ctxWithLogger.Value(log_fields).([]slog.Attr); ok {
+        other = context.WithValue(other, log_fields, v)
+    }
+
+    return InitFromCtx(other, l)
+}
