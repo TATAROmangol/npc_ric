@@ -1,10 +1,10 @@
-package httpserver
+package httpsend
 
 import "fmt"
 
 type Config struct {
-	Port int `env:"FORMS_HTTP_PORT"`
-	Host string `env:"FORMS_HTTP_HOST"`
+	Port int `env:"FORMS_SEND_HTTP_PORT"`
+	Host string `env:"FORMS_SEND_HTTP_HOST"`
 }
 
 func (c *Config) Addr() string {

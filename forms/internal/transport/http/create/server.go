@@ -1,16 +1,16 @@
-package httpserver
+package httpcreate
 
 import (
 	"context"
 	"net/http"
 )
 
-type Server struct{
+type CreateServer struct{
 	ctx context.Context
 	srv *http.Server
 }
 
-func NewServer(ctx context.Context,cfg Config) *Server {
+func NewServer(ctx context.Context,cfg Config) *CreateServer {
 	mux := http.NewServeMux()
 
 	srv := &http.Server{
@@ -18,16 +18,16 @@ func NewServer(ctx context.Context,cfg Config) *Server {
 		Handler: mux,
 	}
 
-	return &Server{
+	return &CreateServer{
 		ctx: ctx,
 		srv: srv,
 	}
 }
 
-func (s *Server) Run() error {
+func (s *CreateServer) Run() error {
 	return s.srv.ListenAndServe()
 }
 
-func (s *Server) Shutdown(ctx context.Context) error {
+func (s *CreateServer) Shutdown(ctx context.Context) error {
 	return s.srv.Shutdown(ctx)
 }
