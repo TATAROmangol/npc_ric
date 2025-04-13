@@ -7,16 +7,16 @@ create table institutions (
 
 create table mentors (
     id serial primary key,
-    info text not null,
+    info text not null
 )
 
 create table users (
     id serial primary key,
     info text not null,
-    mentor_id text not null references mentors(id),
+    mentor_id text not null references mentors(id)
 );
 
 create table documents (
-    institution_id int primary key,
-    users_id []int
+    institution_id int primary key references institutions(id),
+    users_id int[] not null 
 );
