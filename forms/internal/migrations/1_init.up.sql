@@ -5,14 +5,10 @@ create table institutions (
     columns text not null
 );
 
-create table mentors (
-    id serial primary key,
-    info text not null
-)
-
 create table users (
     id serial primary key,
     info text not null,
+    institution_id int not null references institutions(id),
     mentor_id text not null references mentors(id)
 );
 
