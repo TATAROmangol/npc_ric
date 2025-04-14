@@ -1,8 +1,7 @@
 package config
 
 import (
-	httpsend "forms/internal/transport/http/send"
-	httpcreate "forms/internal/transport/http/create"
+	httpserver "forms/internal/transport/http"
 	"forms/pkg/migrator"
 	"forms/pkg/postgres"
 	"log"
@@ -14,8 +13,7 @@ import (
 type Config struct {
 	PG postgres.Config
 	Migrator migrator.Config
-	HTTPCreate httpcreate.Config
-	HTTPSend httpsend.Config
+	HTTP httpserver.Config
 }
 
 func MustLoad() *Config {

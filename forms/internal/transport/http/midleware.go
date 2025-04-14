@@ -1,4 +1,4 @@
-package httpcreate
+package httpserver
 
 import (
 	"context"
