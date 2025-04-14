@@ -14,7 +14,7 @@ type SendHandler struct{
 	Sender Sender
 }
 
-func (fh *SendHandler) SendForm() http.Handler{
+func (sh *SendHandler) SendForm() http.Handler{
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		type Request struct{
 			Institution string   `json:"institution"`
@@ -28,7 +28,7 @@ func (fh *SendHandler) SendForm() http.Handler{
 		}
 		defer r.Body.Close()
 
-		id, err := fh.Sender.SendForm(r.Context(), req.Institution, req.Info)
+		id, err := sh.Sender.SendForm(r.Context(), req.Institution, req.Info)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
@@ -44,5 +44,26 @@ func (fh *SendHandler) SendForm() http.Handler{
 		}
 
 		w.WriteHeader(http.StatusOK)
+	})
+}
+
+func (sh *SendHandler) GetMentorsId() http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+
+	})
+}
+
+func (sh *SendHandler) GetInstitutionsId() http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+
+	})
+}
+
+func (sh *SendHandler) FindFromINN() http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+
 	})
 }
