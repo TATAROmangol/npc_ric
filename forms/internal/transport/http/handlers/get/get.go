@@ -15,7 +15,7 @@ type Getter interface {
 	GetFormColumns(ctx context.Context, id int) ([]string, error)
 }
 
-type GetHandler struct{
+type GetHandler struct {
 	srv Getter
 }
 
@@ -33,12 +33,11 @@ func (h *GetHandler) GetInstitutions() http.Handler {
 			return
 		}
 
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(institutions); err != nil {
 			http.Error(w, "failed to encode response", http.StatusInternalServerError)
 			return
 		}
-
-		w.WriteHeader(http.StatusOK)
 	})
 }
 

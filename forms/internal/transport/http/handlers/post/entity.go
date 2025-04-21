@@ -1,0 +1,21 @@
+package post
+
+type PostInstitutionRequest struct {
+	Name    string   `json:"name"`
+	INN     int      `json:"inn"`
+	Columns []string `json:"columns"`
+}
+
+type PostInstitutionResponse struct {
+	Id int `json:"id"`
+}
+
+type PostFormRequest struct {
+	InstitutionId int      `json:"institution_id"`
+	Info          []string `json:"info"`
+	MentorId      int      `json:"mentor_id"`
+}
+
+type PostFormResponse struct {
+	Id int `json:"id"`
+}
