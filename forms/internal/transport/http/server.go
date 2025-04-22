@@ -54,7 +54,6 @@ func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *Send
 	admin := mux.PathPrefix("/admin").Subrouter()
 	admin.Use(m.InitLoggerContextMiddleware(ctx))
 	admin.Use(m.InitJsonContentTypeMiddleware())
-
 	admin.Handle("/post/institution", h.Poster.PostInstitution()).Methods(http.MethodPost)
 	admin.Handle("/post/mentor", h.Poster.PostMentor()).Methods(http.MethodPost)
 	admin.Handle("/put/institution", h.Putter.PutInstitutionInfo()).Methods(http.MethodPut)
