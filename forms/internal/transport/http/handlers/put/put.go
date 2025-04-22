@@ -6,17 +6,17 @@ import (
 	"net/http"
 )
 
-type Puter interface {
+type Putter interface {
 	PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error
 	PutInstitutionColumns(ctx context.Context, id int, columns []string) error
 	PutMentorRequest(ctx context.Context, id int, info string) error
 }
 
 type PutHandler struct {
-	srv Puter
+	srv Putter
 }
 
-func NewHandler(srv Puter) *PutHandler {
+func NewHandler(srv Putter) *PutHandler {
 	return &PutHandler{
 		srv: srv,
 	}

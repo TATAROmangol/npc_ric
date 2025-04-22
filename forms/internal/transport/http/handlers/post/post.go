@@ -9,6 +9,7 @@ import (
 
 type Poster interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
+	PostMentor(ctx context.Context, name string) (int, error)
 	PostForm(ctx context.Context, institutionId int, info []string) (int, error)
 }
 
@@ -38,6 +39,29 @@ func (h *PostHandler) PostInstitution() http.Handler {
 
 		w.WriteHeader(http.StatusCreated)
 		if err := json.NewEncoder(w).Encode(PostInstitutionResponse{Id: id}); err != nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to encode response", err)
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+			return
+		}
+	})
+}
+
+func (h *PostHandler) PostMentor() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req PostMentorRequest
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		id, err := h.srv.PostMentor(r.Context(), req.Name)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		if err := json.NewEncoder(w).Encode(PostMentorResponse{Id: id}); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to encode response", err)
 			http.Error(w, "failed to encode response", http.StatusInternalServerError)
 			return

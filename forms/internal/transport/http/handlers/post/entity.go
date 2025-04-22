@@ -10,6 +10,14 @@ type PostInstitutionResponse struct {
 	Id int `json:"id"`
 }
 
+type PostMentorRequest struct {
+	Name string `json:"name"`
+}
+
+type PostMentorResponse struct {
+	Id int `json:"id"`
+}
+
 type PostFormRequest struct {
 	InstitutionId int      `json:"institution_id"`
 	Info          []string `json:"info"`
