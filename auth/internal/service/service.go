@@ -5,6 +5,8 @@ import (
 	"context"
 )
 
+//go:generate mockgen -source=service.go -destination=./mocks/service_mock.go -package=mocks
+
 type Validator interface {
 	IsValid(login, password string) bool
 }

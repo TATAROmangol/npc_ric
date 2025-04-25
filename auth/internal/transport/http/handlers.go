@@ -1,10 +1,13 @@
 package httpserver
 
 import (
+	"auth/pkg/logger"
 	"context"
 	"encoding/json"
 	"net/http"
 )
+
+//go:generate mockgen -source=handlers.go -destination=./mocks/mock_handlers.go -package=mocks
 
 type LoginRequest struct {
 	Login   string `json:"login"`
@@ -25,6 +28,12 @@ func LoginHandler(srv Loginer) http.Handler {
 			return
 		}
 		defer r.Body.Close()
+
+		if req.Login == "" || req.Password == "" {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "invalid login or password", nil)
+			http.Error(w, "login and password are required", http.StatusBadRequest)
+			return
+		}
 
 		token, err := srv.Login(r.Context(), req.Login, req.Password)
 		if err != nil{
