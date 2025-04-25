@@ -43,18 +43,17 @@ type Middlewares interface {
 	InitJsonContentTypeMiddleware() func(h http.Handler) http.Handler
 }
 
-type SendServer struct{
+type HTTPServer struct{
 	ctx context.Context
 	server *http.Server
 }
 
-func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *SendServer {
+func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *HTTPServer {
 	mux := mux.NewRouter()
 
 	admin := mux.PathPrefix("/admin").Subrouter()
 	admin.Use(m.InitLoggerContextMiddleware(ctx))
 	admin.Use(m.InitJsonContentTypeMiddleware())
-
 	admin.Handle("/post/institution", h.Poster.PostInstitution()).Methods(http.MethodPost)
 	admin.Handle("/post/mentor", h.Poster.PostMentor()).Methods(http.MethodPost)
 	admin.Handle("/put/institution", h.Putter.PutInstitutionInfo()).Methods(http.MethodPut)
@@ -78,16 +77,16 @@ func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *Send
 		Handler: mux,
 	}
 
-	return &SendServer{
+	return &HTTPServer{
 		ctx: ctx,
 		server: server,
 	}
 }
 
-func (s *SendServer) Run() error {
-	return s.server.ListenAndServe()
+func (hs *HTTPServer) Run() error {
+	return hs.server.ListenAndServe()
 }
 
-func (s *SendServer) Shutdown(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
+func (hs *HTTPServer) Shutdown(ctx context.Context) error {
+	return hs.server.Shutdown(ctx)
 }

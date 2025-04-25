@@ -5,14 +5,14 @@ create table institutions (
     columns text not null
 );
 
-create table users (
+create table mentors (
     id serial primary key,
-    info text not null,
-    institution_id int not null references institutions(id),
-    mentor_id text not null references mentors(id)
+    name text not null
 );
 
-create table documents (
-    institution_id int primary key references institutions(id),
-    users_id int[] not null 
+create table forms (
+    id serial primary key,
+    info text not null,
+    institution_id int not null references institutions(id) ON DELETE CASCADE,
+    mentor_id int not null references mentors(id) ON DELETE CASCADE
 );

@@ -1,0 +1,33 @@
+package service
+
+import (
+	"context"
+	"forms/internal/entities"
+)
+
+type GetRepo interface {
+	GetInstitutions(ctx context.Context) ([]entities.Institution, error)
+	GetMentors(ctx context.Context) ([]entities.Mentor, error)
+	GetInstitutionFromINN(ctx context.Context, inn int) (entities.Institution, error)
+	GetFormColumns(ctx context.Context, id int) ([]string, error)
+}
+
+type GetService struct {
+	GetRepo GetRepo
+}
+
+func (gs *GetService) GetInstitutions(ctx context.Context) ([]entities.Institution, error) {
+	return gs.GetRepo.GetInstitutions(ctx)
+}
+
+func (gs *GetService) GetMentors(ctx context.Context) ([]entities.Mentor, error) {
+	return gs.GetRepo.GetMentors(ctx)
+}
+
+func (gs *GetService) GetInstitutionFromINN(ctx context.Context, inn int) (entities.Institution, error) {
+	return gs.GetRepo.GetInstitutionFromINN(ctx, inn)
+}
+
+func (gs *GetService) GetFormColumns(ctx context.Context, id int) ([]string, error) {
+	return gs.GetRepo.GetFormColumns(ctx, id)
+}

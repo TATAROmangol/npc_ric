@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package table;
+
+service TableService {
+  rpc GetTable (GetTableRequest) returns (GetTableResponse);
+}
+
+message GetTableRequest {
+  int32 institution_id = 1;
+}
+
+message GetTableResponse {
+  repeated string rows = 1;
+}
