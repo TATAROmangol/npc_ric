@@ -2,7 +2,7 @@ from db.models import Template, GeneratedDocument
 from db.database import SessionLocal
 from docxtpl import DocxTemplate
 import io
-import json
+# import json
 
 
 class DocxGeneratorService:
@@ -24,8 +24,7 @@ class DocxGeneratorService:
             if save_to_db:
                 new_doc = GeneratedDocument(
                     template_id=template.id,
-                    file_content=file_content,
-                    metadata_json=json.dumps(data)
+                    file_content=file_content
                 )
                 db.add(new_doc)
                 db.commit()
