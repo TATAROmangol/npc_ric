@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/caarlos0/env v3.5.0+incompatible // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
