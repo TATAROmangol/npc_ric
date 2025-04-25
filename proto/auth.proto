@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+option go_package = "github.com/npc_ric/pkg/grpc/auth";
+
 package auth;
 
 service Verify {
