@@ -7,7 +7,7 @@ import (
 	"auth/pkg/jwt"
 	"log"
 
-	"github.com/caarlos0/env"
+	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
@@ -19,7 +19,7 @@ type Config struct {
 }
 
 func MustLoad() *Config {
-	cfg := &Config{}
+	var cfg Config
 	
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("not found env: %v", err)
@@ -27,5 +27,5 @@ func MustLoad() *Config {
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalf("Error parse .env file: %v", err)
 	}
-	return cfg
+	return &cfg
 }
