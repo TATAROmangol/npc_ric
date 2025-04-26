@@ -41,6 +41,8 @@ type Handlers struct{
 type Middlewares interface {
 	InitLoggerContextMiddleware(ctx context.Context) func(h http.Handler) http.Handler
 	InitJsonContentTypeMiddleware() func(h http.Handler) http.Handler
+	OperationMiddleware() func(h http.Handler) http.Handler
+	AuthMiddleware() func(h http.Handler) http.Handler
 }
 
 type HTTPServer struct{
@@ -50,10 +52,12 @@ type HTTPServer struct{
 
 func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *HTTPServer {
 	mux := mux.NewRouter()
+	mux.Use(m.InitLoggerContextMiddleware(ctx))
+	mux.Use(m.InitJsonContentTypeMiddleware())
+	mux.Use(m.OperationMiddleware())
 
 	admin := mux.PathPrefix("/admin").Subrouter()
-	admin.Use(m.InitLoggerContextMiddleware(ctx))
-	admin.Use(m.InitJsonContentTypeMiddleware())
+	admin.Use(m.AuthMiddleware())
 	admin.Handle("/post/institution", h.Poster.PostInstitution()).Methods(http.MethodPost)
 	admin.Handle("/post/mentor", h.Poster.PostMentor()).Methods(http.MethodPost)
 	admin.Handle("/put/institution", h.Putter.PutInstitutionInfo()).Methods(http.MethodPut)
@@ -70,7 +74,7 @@ func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *HTTP
 	user.Handle("/get/mentors", h.Getter.GetMentors()).Methods(http.MethodGet)
 	user.Handle("/get/institution", h.Getter.GetInstitutionFromINN()).Methods(http.MethodGet)
 	user.Handle("/get/form/columns", h.Getter.GetFormColumns()).Methods(http.MethodGet)
-	user.Handle("post/form", h.Poster.PostForm()).Methods(http.MethodPost)
+	user.Handle("/post/form", h.Poster.PostForm()).Methods(http.MethodPost)
 	
 	server := &http.Server{
 		Addr:    cfg.Addr(),
