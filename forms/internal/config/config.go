@@ -1,6 +1,8 @@
 package config
 
 import (
+	tablegrpc "forms/internal/transport/grpc/table"
+	"forms/internal/transport/grpc/verify"
 	httpserver "forms/internal/transport/http"
 	"forms/pkg/migrator"
 	"forms/pkg/postgres"
@@ -14,6 +16,8 @@ type Config struct {
 	PG postgres.Config
 	Migrator migrator.Config
 	HTTP httpserver.Config
+	Verify verify.Config
+	GRPC tablegrpc.Config
 }
 
 func MustLoad() *Config {

@@ -1,4 +1,4 @@
-package admin
+package put
 
 type PutInstitutionInfoRequest struct {
 	Id   int    `json:"id"`

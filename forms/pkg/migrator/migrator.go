@@ -38,3 +38,16 @@ func (mig *Migrator) Up() error {
 
 	return fmt.Errorf("migrations are not applied: current version=%v, err=%v", vers, err)
 }
+
+func (mig *Migrator) Close() error {
+	source, database := mig.m.Close()
+	if database != nil {
+		return fmt.Errorf("failed close migrator: err=%v", database)
+	}
+	
+	if source != nil {
+		return fmt.Errorf("failed close migrator: err=%v", source)
+	}
+
+	return nil
+}

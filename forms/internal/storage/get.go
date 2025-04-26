@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"fmt"
 	"forms/internal/entities"
 	"forms/pkg/logger"
 )
@@ -110,4 +111,27 @@ func (s *Storage) GetFormColumns(ctx context.Context, id int) ([]string, error){
 	}
 
 	return columns, nil
+}
+
+func (s *Storage) GetFormRows(ctx context.Context, id int) ([]string, error){
+	// stmt, err := s.db.Prepare(`
+	// SELECT info
+	// FROM institutions
+	// WHERE id = $1
+	// `)
+	// if err != nil {
+	// 	logger.GetFromCtx(ctx).ErrorContext(ctx, ErrCreateStatement, err)
+	// 	return nil, err
+	// }
+	// defer stmt.Close()
+
+	// var rows []string
+	// err = stmt.QueryRow(id).Scan(&rows)
+	// if err != nil {
+	// 	logger.GetFromCtx(ctx).ErrorContext(ctx, ErrScanRow, err)
+	// 	return nil, err
+	// }
+
+	// return rows, nil
+	return nil, fmt.Errorf("not implemented")	
 }

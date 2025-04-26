@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	"context"
@@ -57,7 +57,7 @@ func (m *Middlewares) OperationMiddleware() func(h http.Handler) http.Handler {
 	}
 }
 
-func (m *Middlewares) AuthMiddleware(vrf Verifier) func(h http.Handler) http.Handler {
+func (m *Middlewares) AuthMiddleware() func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("admin_token")
@@ -67,7 +67,7 @@ func (m *Middlewares) AuthMiddleware(vrf Verifier) func(h http.Handler) http.Han
 				return
 			}
 
-			ok, err := vrf.Verify(r.Context(), cookie.Value)
+			ok, err := m.Verifier.Verify(r.Context(), cookie.Value)
 			if err != nil || !ok {
 				logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "invalid token", err)
 				http.Error(w, "invalid token", http.StatusUnauthorized)

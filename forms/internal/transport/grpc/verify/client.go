@@ -1,4 +1,4 @@
-package admin
+package verify
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type Client struct {
 	client authpb.VerifyClient
 }
 
-func NewClient(cfg Config, addr string) *Client {
+func NewClient(cfg Config) *Client {
 	return &Client{
 		cfg: cfg,
 		conn: nil,
@@ -63,4 +63,15 @@ func (c *Client) Verify(ctx context.Context, token string) (bool, error) {
 	}
 
 	return res.GetIsAdmin(), nil
+}
+
+func (c *Client) Close() error{
+	if c.conn != nil {
+		if err := c.conn.Close(); err != nil {
+			logger.GetFromCtx(context.Background()).ErrorContext(context.Background(), "failed to close grpc connection", err)
+			return err
+		}
+	}
+
+	return nil
 }
