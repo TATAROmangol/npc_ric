@@ -55,3 +55,18 @@ func LoginHandler(srv Loginer) http.Handler {
 	})
 }
 
+func LogoutHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("admin_token")
+		if err != nil || cookie == nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "not found cookie", nil)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		cookie.MaxAge = -1
+		http.SetCookie(w, cookie)
+		w.WriteHeader(http.StatusAccepted)
+	})
+}
+

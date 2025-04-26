@@ -22,6 +22,7 @@ func NewServer(ctx context.Context, cfg Config, srv Service) *Server {
 	mux.Use(InitLoggerContextMiddleware(ctx))
 	mux.Use(Operation())
 	mux.Handle("/login", LoginHandler(srv)).Methods(http.MethodPost)
+	mux.Handle("/logout", LogoutHandler()).Methods(http.MethodPost)
 
 	return &Server{
 		ctx: ctx,
