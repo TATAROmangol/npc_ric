@@ -67,7 +67,8 @@ func (x *GetTableRequest) GetInstitutionId() int32 {
 
 type GetTableResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Rows          []string               `protobuf:"bytes,1,rep,name=rows,proto3" json:"rows,omitempty"`
+	Columns       []string               `protobuf:"bytes,1,rep,name=columns,proto3" json:"columns,omitempty"`
+	Rows          []string               `protobuf:"bytes,2,rep,name=rows,proto3" json:"rows,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -102,6 +103,13 @@ func (*GetTableResponse) Descriptor() ([]byte, []int) {
 	return file_table_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *GetTableResponse) GetColumns() []string {
+	if x != nil {
+		return x.Columns
+	}
+	return nil
+}
+
 func (x *GetTableResponse) GetRows() []string {
 	if x != nil {
 		return x.Rows
@@ -115,9 +123,10 @@ const file_table_proto_rawDesc = "" +
 	"\n" +
 	"\vtable.proto\x12\x05table\"8\n" +
 	"\x0fGetTableRequest\x12%\n" +
-	"\x0einstitution_id\x18\x01 \x01(\x05R\rinstitutionId\"&\n" +
-	"\x10GetTableResponse\x12\x12\n" +
-	"\x04rows\x18\x01 \x03(\tR\x04rows2K\n" +
+	"\x0einstitution_id\x18\x01 \x01(\x05R\rinstitutionId\"@\n" +
+	"\x10GetTableResponse\x12\x18\n" +
+	"\acolumns\x18\x01 \x03(\tR\acolumns\x12\x12\n" +
+	"\x04rows\x18\x02 \x03(\tR\x04rows2K\n" +
 	"\fTableService\x12;\n" +
 	"\bGetTable\x12\x16.table.GetTableRequest\x1a\x17.table.GetTableResponseB#Z!github.com/npc_ric/pkg/grpc/tableb\x06proto3"
 

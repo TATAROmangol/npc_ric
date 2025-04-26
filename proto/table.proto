@@ -13,5 +13,6 @@ message GetTableRequest {
 }
 
 message GetTableResponse {
-  repeated string rows = 1;
+  repeated string columns = 1;
+  repeated string rows = 2;
 }
