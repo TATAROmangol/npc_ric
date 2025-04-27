@@ -2,6 +2,8 @@ package service
 
 import "context"
 
+//go:generate mockgen -source=post.go -destination=./tests/mocks/post_mock.go -package=mocks
+
 type PostRepo interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
 	PostMentor(ctx context.Context, name string) (int, error)

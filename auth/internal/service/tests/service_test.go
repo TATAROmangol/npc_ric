@@ -1,7 +1,8 @@
 package service
 
 import (
-	"auth/internal/service/mocks"
+	"auth/internal/service"
+	"auth/internal/service/tests/mocks"
 	"auth/pkg/logger"
 	"context"
 	"errors"
@@ -97,9 +98,9 @@ func TestService_Login(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &Service{
-				validator: validator,
-				jwt:       jwt,
+			s := &service.Service{
+				Validator: validator,
+				Jwt:       jwt,
 			}
 			tt.mockBehavior(tt.args)
 			got, err := s.Login(ctx, tt.args.login, tt.args.password)
@@ -161,9 +162,9 @@ func TestService_IsAdmin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &Service{
-				validator: validator,
-				jwt:       jwt,
+			s := &service.Service{
+				Validator: validator,
+				Jwt:       jwt,
 			}
 			tt.mockBehavior(tt.token)
 

@@ -1,4 +1,4 @@
-package storage
+package repository
 
 const (
 	ErrCreateStatement = "failed to prepare statement"

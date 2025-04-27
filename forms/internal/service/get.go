@@ -5,6 +5,8 @@ import (
 	"forms/internal/entities"
 )
 
+//go:generate mockgen -source=get.go -destination=./tests/mocks/pet_mock.go -package=mocks
+
 type GetRepo interface {
 	GetInstitutions(ctx context.Context) ([]entities.Institution, error)
 	GetMentors(ctx context.Context) ([]entities.Mentor, error)

@@ -9,7 +9,7 @@ import (
 type Putter interface {
 	PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error
 	PutInstitutionColumns(ctx context.Context, id int, columns []string) error
-	PutMentorRequest(ctx context.Context, id int, info string) error
+	PutMentor(ctx context.Context, id int, info string) error
 }
 
 type PutHandler struct {
@@ -66,7 +66,7 @@ func (h *PutHandler) PutMentor() http.Handler {
 			return
 		}
 
-		err := h.srv.PutMentorRequest(r.Context(), req.Id, req.Info)
+		err := h.srv.PutMentor(r.Context(), req.Id, req.Info)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

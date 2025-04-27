@@ -4,7 +4,7 @@ import (
 	"context"
 	"forms/internal/config"
 	"forms/internal/service"
-	"forms/internal/storage"
+	"forms/internal/storage/repository"
 	tablegrpc "forms/internal/transport/grpc/table"
 	"forms/internal/transport/grpc/verify"
 	httpserver "forms/internal/transport/http"
@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	migrationPath = "file://internal/migrations"
+	migrationPath = "file://internal/storage/migrations"
 )
 
 func main(){
@@ -57,7 +57,7 @@ func main(){
 	}
 	l.InfoContext(ctx, "migrator closed")
 
-	repo := storage.NewStorage(db)
+	repo := repository.NewStorage(db)
 
 	srv := service.NewServices(repo)
 

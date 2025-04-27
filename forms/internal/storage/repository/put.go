@@ -1,4 +1,4 @@
-package storage
+package repository
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func (s *Storage) PutInstitutionColumns(ctx context.Context, id int, columns []s
 	return nil
 }
 
-func (s *Storage) PutMentorRequest(ctx context.Context, id int, info string) error {
+func (s *Storage) PutMentor(ctx context.Context, id int, info string) error {
 	stmt, err := s.db.Prepare(`
 	UPDATE mentors 
 	SET info = $2

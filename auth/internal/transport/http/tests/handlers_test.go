@@ -1,7 +1,8 @@
 package httpserver
 
 import (
-	"auth/internal/transport/http/mocks"
+	"auth/internal/transport/http/tests/mocks"
+	hs "auth/internal/transport/http"
 	"auth/pkg/logger"
 	"bytes"
 	"context"
@@ -26,7 +27,7 @@ func TestLoginHandler(t *testing.T) {
 	tests := []struct {
 		name         string
 		mockBehavior MockBehavior
-		req          LoginRequest
+		req          hs.LoginRequest
 		want         string
 		wantStatus   int
 	}{
@@ -34,7 +35,7 @@ func TestLoginHandler(t *testing.T) {
 			name:       "valid credentials",
 			want:       "test",
 			wantStatus: http.StatusOK,
-			req: LoginRequest{
+			req: hs.LoginRequest{
 				Login:    "login",
 				Password: "password",
 			},
@@ -46,7 +47,7 @@ func TestLoginHandler(t *testing.T) {
 			name:       "wrong password",
 			want:       "",
 			wantStatus: http.StatusBadRequest,
-			req: LoginRequest{
+			req: hs.LoginRequest{
 				Login:    "login",
 				Password: "",
 			},
@@ -56,7 +57,7 @@ func TestLoginHandler(t *testing.T) {
 			name:       "wrong password",
 			want:       "",
 			wantStatus: http.StatusBadRequest,
-			req: LoginRequest{
+			req: hs.LoginRequest{
 				Login:    "",
 				Password: "password",
 			},
@@ -66,7 +67,7 @@ func TestLoginHandler(t *testing.T) {
 			name:       "err token",
 			want:       "",
 			wantStatus: http.StatusInternalServerError,
-			req: LoginRequest{
+			req: hs.LoginRequest{
 				Login:    "login",
 				Password: "password",
 			},
@@ -89,7 +90,7 @@ func TestLoginHandler(t *testing.T) {
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
-			LoginHandler(loginer).ServeHTTP(rr, req)
+			hs.LoginHandler(loginer).ServeHTTP(rr, req)
 
 			if tt.wantStatus != rr.Code {
 				t.Errorf("LoginHandler status got %v, want %v", rr.Code, tt.wantStatus)
@@ -146,7 +147,7 @@ func TestLogoutHandler(t *testing.T) {
                 req.AddCookie(tt.cookie) 
             }
 
-			LogoutHandler().ServeHTTP(rr, req)
+			hs.LogoutHandler().ServeHTTP(rr, req)
 			if rr.Code != tt.wantCode {
 				t.Errorf("LogoutHandler status got %v, want %v", rr.Code, tt.wantCode)
 			}
