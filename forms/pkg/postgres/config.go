@@ -19,3 +19,10 @@ func (c *Config) GetConnString() string {
 		c.Host, c.Port, c.User, c.Password, c.DBName, c.SSL,
 	)
 }
+
+func (c *Config) GetMigrationConnString() string {
+	return fmt.Sprintf(
+		"postgres://%v:%v@%v:%v/%v?sslmode=%v&x-migrations-table=forms_migrtions_schema",
+		c.User, c.Password, c.Host, c.Port, c.DBName, c.SSL,
+	)
+}

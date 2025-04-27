@@ -145,11 +145,12 @@ func TestPostService_PostForm(t *testing.T) {
 	l := logger.New()
 	ctx = logger.InitFromCtx(ctx, l)
 
-	type MockBehavior func(id int, info []string)
+	type MockBehavior func(info []string, institutionId int, mentorId int)
 
 	type args struct {
-		institutionId int
 		info          []string
+		institutionId int
+		mentorId int
 	}
 
 	tests := []struct {
@@ -161,8 +162,8 @@ func TestPostService_PostForm(t *testing.T) {
 	}{
 		{
 			name: "valid form",
-			MockBehavior: func(id int, info []string) {
-				repo.EXPECT().PostForm(gomock.Any(), id, info).Return(1, nil)
+			MockBehavior: func(info []string, institutionId int, mentorId int) {
+				repo.EXPECT().PostForm(gomock.Any(), info, institutionId, mentorId).Return(1, nil)
 			},
 			args: args{
 				institutionId: 1,
@@ -173,8 +174,8 @@ func TestPostService_PostForm(t *testing.T) {
 		},
 		{
 			name: "error posting form",
-			MockBehavior: func(id int, info []string) {
-				repo.EXPECT().PostForm(gomock.Any(), id, info).Return(0, errors.New("error posting form"))
+			MockBehavior: func(info []string, institutionId int, mentorId int) {
+				repo.EXPECT().PostForm(gomock.Any(), info, institutionId, mentorId).Return(0, errors.New("error posting form"))
 			},
 			args: args{
 				institutionId: 0,
@@ -186,12 +187,12 @@ func TestPostService_PostForm(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.MockBehavior(tt.args.institutionId, tt.args.info)
+			tt.MockBehavior(tt.args.info, tt.args.institutionId, tt.args.mentorId)
 
 			ps := &PostService{
 				PostRepo: repo,
 			}
-			got, err := ps.PostForm(ctx, tt.args.institutionId, tt.args.info)
+			got, err := ps.PostForm(ctx, tt.args.info, tt.args.institutionId, tt.args.mentorId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("PostService.PostForm() error = %v, wantErr %v", err, tt.wantErr)
 				return

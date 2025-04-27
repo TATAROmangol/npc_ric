@@ -1,4 +1,4 @@
-package migrator
+package postgres
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ type Migrator struct{
 }
 
 //dirPath - dir with migrate files
-func New(dirPath string, cfg Config) (*Migrator, error){
-	m, err := migrate.New(dirPath, cfg.GetConnString())
+func NewMigrator(dirPath string, cfg Config) (*Migrator, error){
+	m, err := migrate.New(dirPath, cfg.GetMigrationConnString())
 	if err != nil{
 		return nil, fmt.Errorf("failed create migrator, err: %v", err)
 	}

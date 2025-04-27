@@ -19,8 +19,8 @@ type PostMentorResponse struct {
 }
 
 type PostFormRequest struct {
-	InstitutionId int      `json:"institution_id"`
 	Info          []string `json:"info"`
+	InstitutionId int      `json:"institution_id"`
 	MentorId      int      `json:"mentor_id"`
 }
 

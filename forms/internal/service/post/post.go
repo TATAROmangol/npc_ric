@@ -7,7 +7,7 @@ import "context"
 type PostRepo interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
 	PostMentor(ctx context.Context, name string) (int, error)
-	PostForm(ctx context.Context, institutionId int, info []string) (int, error)
+	PostForm(ctx context.Context, info []string, institutionId int, mentorId int) (int, error)
 }
 
 type PostService struct{
@@ -28,6 +28,6 @@ func (ps *PostService) PostMentor(ctx context.Context, name string) (int, error)
 	return ps.PostRepo.PostMentor(ctx, name)
 }	
 
-func (ps *PostService) PostForm(ctx context.Context, institutionId int, info []string) (int, error) {
-	return ps.PostRepo.PostForm(ctx, institutionId, info)
+func (ps *PostService) PostForm(ctx context.Context, info []string, institutionId int, mentorId int) (int, error) {
+	return ps.PostRepo.PostForm(ctx, info, institutionId, mentorId)
 }

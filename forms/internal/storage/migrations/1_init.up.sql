@@ -1,7 +1,7 @@
 create table institutions (
     id serial primary key,
     name text not null,
-    inn int not null,
+    inn bigint not null UNIQUE,
     columns text not null
 );
 

@@ -11,7 +11,6 @@ import (
 	"forms/internal/transport/http/handlers"
 	"forms/internal/transport/http/middlewares"
 	"forms/pkg/logger"
-	"forms/pkg/migrator"
 	"forms/pkg/postgres"
 	"os"
 	"os/signal"
@@ -38,7 +37,7 @@ func main(){
 	defer db.Close()
 	l.InfoContext(ctx, "Connected to postgres", "path", cfg.PG.GetConnString())
 
-	m, err := migrator.New(migrationPath, cfg.Migrator)
+	m, err := postgres.NewMigrator(migrationPath, cfg.PG)
 	if err != nil {
 		l.ErrorContext(ctx, "failed in create migrator", err)
 		os.Exit(1)
