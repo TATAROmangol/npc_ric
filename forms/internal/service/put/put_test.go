@@ -1,10 +1,9 @@
-package service
+package put
 
 import (
 	"context"
 	"errors"
-	"forms/internal/service"
-	"forms/internal/service/tests/mocks"
+	"forms/internal/service/put/mocks"
 	"forms/pkg/logger"
 	"testing"
 
@@ -60,7 +59,7 @@ func TestPutService_PutInstitutionInfo(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.args.id, tt.args.name, tt.args.inn)
 
-			ps := &service.PutService{
+			ps := &PutService{
 				PutRepo: repo,
 			}
 			if err := ps.PutInstitutionInfo(ctx, tt.args.id, tt.args.name, tt.args.inn); (err != nil) != tt.wantErr {
@@ -116,7 +115,7 @@ func TestPutService_PutInstitutionColumns(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.args.id, tt.args.columns)
 
-			ps := &service.PutService{
+			ps := &PutService{
 				PutRepo: repo,
 			}
 			if err := ps.PutInstitutionColumns(ctx, tt.args.id, tt.args.columns); (err != nil) != tt.wantErr {
@@ -172,7 +171,7 @@ func TestPutService_PutMentor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.args.id, tt.args.info)
 
-			ps := &service.PutService{
+			ps := &PutService{
 				PutRepo: repo,
 			}
 			if err := ps.PutMentor(ctx, tt.args.id, tt.args.info); (err != nil) != tt.wantErr {

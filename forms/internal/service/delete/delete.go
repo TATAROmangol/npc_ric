@@ -1,8 +1,8 @@
-package service
+package delete
 
 import "context"
 
-//go:generate mockgen -source=delete.go -destination=./tests/mocks/delete_mock.go -package=mocks
+//go:generate mockgen -source=delete.go -destination=./mocks/delete_mock.go -package=mocks
 
 type DeleteRepo interface{
 	DeleteInstitution(ctx context.Context, institutionId int) error
@@ -11,6 +11,12 @@ type DeleteRepo interface{
 
 type DeleteService struct{
 	DeleteRepo DeleteRepo
+}
+
+func NewDeleteService(repo DeleteRepo) *DeleteService {
+	return &DeleteService{
+		DeleteRepo: repo,
+	}
 }
 
 func (ds *DeleteService) DeleteInstitution(ctx context.Context, institutionId int) error {

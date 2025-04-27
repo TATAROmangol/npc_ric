@@ -1,10 +1,9 @@
-package service
+package delete
 
 import (
 	"context"
 	"errors"
-	"forms/internal/service"
-	"forms/internal/service/tests/mocks"
+	"forms/internal/service/delete/mocks"
 	"forms/pkg/logger"
 	"testing"
 
@@ -46,7 +45,7 @@ func TestDeleteService_DeleteInstitution(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.institutionId)
-			ds := &service.DeleteService{
+			ds := &DeleteService{
 				DeleteRepo: repo,
 			}
 			if err := ds.DeleteInstitution(ctx, tt.institutionId); (err != nil) != tt.wantErr {
@@ -91,7 +90,7 @@ func TestDeleteService_DeleteMentor(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.mockBehavior(tt.mentorId)
-			ds := &service.DeleteService{
+			ds := &DeleteService{
 				DeleteRepo: repo,
 			}
 			if err := ds.DeleteMentor(ctx, tt.mentorId); (err != nil) != tt.wantErr {

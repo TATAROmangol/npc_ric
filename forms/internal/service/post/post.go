@@ -1,8 +1,8 @@
-package service
+package post
 
 import "context"
 
-//go:generate mockgen -source=post.go -destination=./tests/mocks/post_mock.go -package=mocks
+//go:generate mockgen -source=post.go -destination=./mocks/post_mock.go -package=mocks
 
 type PostRepo interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
@@ -12,6 +12,12 @@ type PostRepo interface {
 
 type PostService struct{
 	PostRepo PostRepo
+}
+
+func NewPostService(postRepo PostRepo) *PostService {
+	return &PostService{
+		PostRepo: postRepo,
+	}
 }
 
 func (ps *PostService) PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error) {

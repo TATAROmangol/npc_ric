@@ -61,7 +61,6 @@ func main(){
 
 	srv := service.NewServices(repo)
 
-
 	ver := verify.NewClient(cfg.Verify)
 	handler := handlers.NewHandlers(srv)
 	midleware := middlewares.NewMiddlewares(ver)

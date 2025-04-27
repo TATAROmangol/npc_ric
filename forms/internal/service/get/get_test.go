@@ -1,11 +1,10 @@
-package service
+package get
 
 import (
 	"context"
 	"errors"
 	"forms/internal/entities"
-	"forms/internal/service"
-	"forms/internal/service/tests/mocks"
+	"forms/internal/service/get/mocks"
 	"forms/pkg/logger"
 	"reflect"
 	"testing"
@@ -55,7 +54,7 @@ func TestGetService_GetInstitutions(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior()
 
-			gs := &service.GetService{
+			gs := &GetService{
 				GetRepo: repo,
 			}
 			got, err := gs.GetInstitutions(ctx)
@@ -112,7 +111,7 @@ func TestGetService_GetMentors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior()
 
-			gs := &service.GetService{
+			gs := &GetService{
 				GetRepo: repo,
 			}
 			got, err := gs.GetMentors(ctx)
@@ -176,7 +175,7 @@ func TestGetService_GetInstitutionFromINN(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.inn)
 
-			gs := &service.GetService{
+			gs := &GetService{
 				GetRepo: repo,
 			}
 			got, err := gs.GetInstitutionFromINN(ctx, tt.inn)
@@ -230,7 +229,7 @@ func TestGetService_GetFormColumns(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.id)
 
-			gs := &service.GetService{
+			gs := &GetService{
 				GetRepo: repo,
 			}
 			got, err := gs.GetFormColumns(ctx, tt.id)
@@ -284,7 +283,7 @@ func TestGetService_GetFormRows(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.id)
 
-			gs := &service.GetService{
+			gs := &GetService{
 				GetRepo: repo,
 			}
 			got, err := gs.GetFormRows(ctx, tt.id)

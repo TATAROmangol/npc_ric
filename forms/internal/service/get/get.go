@@ -1,11 +1,11 @@
-package service
+package get
 
 import (
 	"context"
 	"forms/internal/entities"
 )
 
-//go:generate mockgen -source=get.go -destination=./tests/mocks/pet_mock.go -package=mocks
+//go:generate mockgen -source=get.go -destination=./mocks/pet_mock.go -package=mocks
 
 type GetRepo interface {
 	GetInstitutions(ctx context.Context) ([]entities.Institution, error)
@@ -17,6 +17,12 @@ type GetRepo interface {
 
 type GetService struct {
 	GetRepo GetRepo
+}
+
+func NewGetService(repo GetRepo) *GetService {
+	return &GetService{
+		GetRepo: repo,
+	}
 }
 
 func (gs *GetService) GetInstitutions(ctx context.Context) ([]entities.Institution, error) {

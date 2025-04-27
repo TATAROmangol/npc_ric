@@ -1,10 +1,9 @@
-package service
+package post
 
 import (
 	"context"
 	"errors"
-	"forms/internal/service"
-	"forms/internal/service/tests/mocks"
+	"forms/internal/service/post/mocks"
 	"forms/pkg/logger"
 	"testing"
 
@@ -67,7 +66,7 @@ func TestPostService_PostInstitution(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.id)
 
-			ps := &service.PostService{
+			ps := &PostService{
 				PostRepo: repo,
 			}
 			got, err := ps.PostInstitution(ctx, tt.args.name, tt.args.inn, tt.args.columns)
@@ -124,7 +123,7 @@ func TestPostService_PostMentor(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.nameMentor)
 
-			ps := &service.PostService{
+			ps := &PostService{
 				PostRepo: repo,
 			}
 			got, err := ps.PostMentor(ctx, tt.nameMentor)
@@ -189,7 +188,7 @@ func TestPostService_PostForm(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.MockBehavior(tt.args.institutionId, tt.args.info)
 
-			ps := &service.PostService{
+			ps := &PostService{
 				PostRepo: repo,
 			}
 			got, err := ps.PostForm(ctx, tt.args.institutionId, tt.args.info)

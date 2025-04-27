@@ -1,8 +1,7 @@
 package service
 
 import (
-	"auth/internal/service"
-	"auth/internal/service/tests/mocks"
+	"auth/internal/service/mocks"
 	"auth/pkg/logger"
 	"context"
 	"errors"
@@ -98,7 +97,7 @@ func TestService_Login(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.Service{
+			s := &Service{
 				Validator: validator,
 				Jwt:       jwt,
 			}
@@ -162,7 +161,7 @@ func TestService_IsAdmin(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := &service.Service{
+			s := &Service{
 				Validator: validator,
 				Jwt:       jwt,
 			}

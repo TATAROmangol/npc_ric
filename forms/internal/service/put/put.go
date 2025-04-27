@@ -1,8 +1,8 @@
-package service
+package put
 
 import "context"
 
-//go:generate mockgen -source=put.go -destination=./tests/mocks/put_mock.go -package=mocks
+//go:generate mockgen -source=put.go -destination=./mocks/put_mock.go -package=mocks
 
 type PutRepo interface{
 	PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error
@@ -12,6 +12,12 @@ type PutRepo interface{
 
 type PutService struct{
 	PutRepo PutRepo
+}
+
+func NewPutService(repo PutRepo) *PutService {
+	return &PutService{
+		PutRepo: repo,
+	}
 }
 
 func (ps *PutService) PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error {

@@ -1,24 +1,31 @@
 package service
 
+import (
+	"forms/internal/service/get"
+	"forms/internal/service/post"
+	"forms/internal/service/put"
+	"forms/internal/service/delete"
+)
+
 type Repo interface {
-	GetRepo
-	PutRepo
-	PostRepo
-	DeleteRepo
+	get.GetRepo
+	put.PutRepo
+	post.PostRepo
+	delete.DeleteRepo
 }
 
 type Services struct {
-	GetService
-	PutService
-	PostService
-	DeleteService
+	*get.GetService
+	*put.PutService
+	*post.PostService
+	*delete.DeleteService
 }
 
 func NewServices(repo Repo) *Services {
 	return &Services{
-		GetService: GetService{GetRepo: repo},
-		PutService: PutService{PutRepo: repo},
-		PostService: PostService{PostRepo: repo},
-		DeleteService: DeleteService{DeleteRepo: repo},
+		GetService:  get.NewGetService(repo),
+		PutService:  put.NewPutService(repo),
+		PostService: post.NewPostService(repo),
+		DeleteService: delete.NewDeleteService(repo),
 	}
 }
