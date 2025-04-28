@@ -91,6 +91,7 @@ func TestPutService_PutInstitutionColumns(t *testing.T) {
 		{
 			name: "valid institution columns",
 			MockBehavior: func(id int, columns []string) {
+				repo.EXPECT().DeleteForms(gomock.Any(), id).Return(nil)
 				repo.EXPECT().PutInstitutionColumns(gomock.Any(), id, columns).Return(nil)
 			},
 			args: args{
@@ -102,7 +103,19 @@ func TestPutService_PutInstitutionColumns(t *testing.T) {
 		{
 			name: "error putting institution columns",
 			MockBehavior: func(id int, columns []string) {
+				repo.EXPECT().DeleteForms(gomock.Any(), id).Return(nil)
 				repo.EXPECT().PutInstitutionColumns(gomock.Any(), id, columns).Return(errors.New("error putting institution columns"))
+			},
+			args: args{
+				id:   1,
+				columns:  []string{"Column1", "Column2"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "error deleting forms",
+			MockBehavior: func(id int, columns []string) {
+				repo.EXPECT().DeleteForms(gomock.Any(), id).Return(errors.New("error deleting forms"))
 			},
 			args: args{
 				id:   1,

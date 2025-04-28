@@ -257,16 +257,16 @@ func TestGetService_GetFormRows(t *testing.T) {
 		name         string
 		MockBehavior MockBehavior
 		id           int
-		want         []string
+		want         [][]string
 		wantErr      bool
 	}{
 		{
 			name: "valid rows",
 			MockBehavior: func(id int) {
-				repo.EXPECT().GetFormRows(gomock.Any(), id).Return([]string{"Row1", "Row2"}, nil)
+				repo.EXPECT().GetFormRows(gomock.Any(), id).Return([][]string{{"Row1", "Row2"}}, nil)
 			},
 			id:      1,
-			want:    []string{"Row1", "Row2"},
+			want:    [][]string{{"Row1", "Row2"}},
 			wantErr: false,
 		},
 		{
