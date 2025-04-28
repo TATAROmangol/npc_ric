@@ -4,7 +4,7 @@ import "forms/internal/entities"
 
 type GetInstitutionsResponse []entities.Institution
 
-type GetMentorsIdResponse []entities.Mentor
+type GetMentorsResponse []entities.Mentor
 
 type GetInstitutionFromINNRequest struct {
 	Inn int `json:"inn"`

@@ -3,10 +3,18 @@ package get
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"forms/internal/entities"
 	"forms/pkg/logger"
 	"net/http"
 )
+
+var (
+	ErrInvalidInn 	 = fmt.Errorf("invalid Inn")
+	ErrInvalidInstitutionId      = fmt.Errorf("invalid InstitutionId")
+)
+
+//go:generate mockgen -source=get.go -destination=./mocks/get_mock.go -package=mocks
 
 type Getter interface {
 	GetInstitutions(ctx context.Context) ([]entities.Institution, error)
@@ -35,6 +43,7 @@ func (h *GetHandler) GetInstitutions() http.Handler {
 
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(institutions); err != nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to encode response", err)
 			http.Error(w, "failed to encode response", http.StatusInternalServerError)
 			return
 		}
@@ -45,7 +54,7 @@ func (h *GetHandler) GetMentors() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mentors, err := h.srv.GetMentors(r.Context())
 		if err != nil {
-			http.Error(w, "invalid request", http.StatusBadRequest)
+			http.Error(w, "invalid request", http.StatusInternalServerError)
 			return
 		}
 
@@ -67,6 +76,12 @@ func (h *GetHandler) GetInstitutionFromINN() http.Handler {
 			return
 		}
 		defer r.Body.Close()
+
+		if req.Inn <= 0 {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed in GetInstitutionFromINN handler", ErrInvalidInn)
+			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
 
 		institution, err := h.srv.GetInstitutionFromINN(r.Context(), req.Inn)
 		if err != nil {
@@ -93,13 +108,15 @@ func (h *GetHandler) GetFormColumns() http.Handler {
 		}
 		defer r.Body.Close()
 
+		if req.InstitutionId <= 0 {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed in GetFormColumns handler", ErrInvalidInstitutionId)
+			http.Error(w, "invalid institution id", http.StatusBadRequest)
+			return
+		}
+
 		columns, err := h.srv.GetFormColumns(r.Context(), req.InstitutionId)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
-			return
-		}
-		if len(columns) == -1 {
-			http.Error(w, "invalid request", http.StatusNotFound)
 			return
 		}
 

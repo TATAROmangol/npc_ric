@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -source=post.go -destination=./mocks/mock_post.go -package=mocks
+
 type Poster interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
 	PostMentor(ctx context.Context, name string) (int, error)

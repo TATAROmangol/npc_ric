@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+//go:generate mockgen -source=put.go -destination=./mocks/put_mock.go -package=mocks
+
 type Putter interface {
 	PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error
 	PutInstitutionColumns(ctx context.Context, id int, columns []string) error

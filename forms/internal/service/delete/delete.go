@@ -20,6 +20,9 @@ func NewDeleteService(repo DeleteRepo) *DeleteService {
 }
 
 func (ds *DeleteService) DeleteInstitution(ctx context.Context, institutionId int) error {
+	if institutionId <= 0{
+		
+	}
 	return ds.DeleteRepo.DeleteInstitution(ctx, institutionId)
 }
 
