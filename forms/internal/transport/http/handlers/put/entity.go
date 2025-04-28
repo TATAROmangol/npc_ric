@@ -13,5 +13,5 @@ type PutInstitutionColumnsRequest struct {
 
 type PutMentorRequest struct {
 	Id   int    `json:"id"`
-	Info string `json:"info"`
+	Name string `json:"info"`
 }

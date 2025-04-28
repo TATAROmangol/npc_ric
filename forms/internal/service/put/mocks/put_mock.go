@@ -34,6 +34,20 @@ func (m *MockPutRepo) EXPECT() *MockPutRepoMockRecorder {
 	return m.recorder
 }
 
+// DeleteForms mocks base method.
+func (m *MockPutRepo) DeleteForms(ctx context.Context, institution_id int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteForms", ctx, institution_id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteForms indicates an expected call of DeleteForms.
+func (mr *MockPutRepoMockRecorder) DeleteForms(ctx, institution_id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteForms", reflect.TypeOf((*MockPutRepo)(nil).DeleteForms), ctx, institution_id)
+}
+
 // PutInstitutionColumns mocks base method.
 func (m *MockPutRepo) PutInstitutionColumns(ctx context.Context, id int, columns []string) error {
 	m.ctrl.T.Helper()
@@ -63,15 +77,15 @@ func (mr *MockPutRepoMockRecorder) PutInstitutionInfo(ctx, id, name, inn interfa
 }
 
 // PutMentor mocks base method.
-func (m *MockPutRepo) PutMentor(ctx context.Context, id int, info string) error {
+func (m *MockPutRepo) PutMentor(ctx context.Context, id int, name string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PutMentor", ctx, id, info)
+	ret := m.ctrl.Call(m, "PutMentor", ctx, id, name)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // PutMentor indicates an expected call of PutMentor.
-func (mr *MockPutRepoMockRecorder) PutMentor(ctx, id, info interface{}) *gomock.Call {
+func (mr *MockPutRepoMockRecorder) PutMentor(ctx, id, name interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutMentor", reflect.TypeOf((*MockPutRepo)(nil).PutMentor), ctx, id, info)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutMentor", reflect.TypeOf((*MockPutRepo)(nil).PutMentor), ctx, id, name)
 }

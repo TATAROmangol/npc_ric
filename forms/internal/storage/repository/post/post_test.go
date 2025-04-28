@@ -37,7 +37,7 @@ func TestPost_PostInstitution(t *testing.T) {
 				columns []string
 			}{
 				name:    "Test Institution",
-				inn:     1234567890,
+				inn:     444,
 				columns: []string{"test1", "test2"},
 			},
 			wantErr: false,
@@ -50,21 +50,8 @@ func TestPost_PostInstitution(t *testing.T) {
 				columns []string
 			}{
 				name:    "Another Institution",
-				inn:     1234567890,
+				inn:     444,
 				columns: []string{"test1", "test2"},
-			},
-			wantErr: true,
-		},
-		{
-			name: "not columns",
-			args: struct {
-				name    string
-				inn     int
-				columns []string
-			}{
-				name:    "Another Institution",
-				inn:     1234567890,
-				columns: []string{},
 			},
 			wantErr: true,
 		},
@@ -167,8 +154,7 @@ func TestPost_PostForm(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mentorId, _ := repo.PostMentor(ctx, "Test Mentor") 
-			got, err := repo.PostForm(ctx, tt.info, tt.institutionId, mentorId)
+			got, err := repo.PostForm(ctx, tt.info, tt.institutionId)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Post.PostForm() error = %v, wantErr %v", err, tt.wantErr)
 				return

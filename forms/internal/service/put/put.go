@@ -7,7 +7,8 @@ import "context"
 type PutRepo interface{
 	PutInstitutionInfo(ctx context.Context, id int, name string, inn int) error
 	PutInstitutionColumns(ctx context.Context, id int, columns []string) error
-	PutMentor(ctx context.Context, id int, info string) error
+	PutMentor(ctx context.Context, id int, name string) error
+	DeleteForms(ctx context.Context, institution_id int) error
 }
 
 type PutService struct{
@@ -25,9 +26,13 @@ func (ps *PutService) PutInstitutionInfo(ctx context.Context, id int, name strin
 }
 
 func (ps *PutService) PutInstitutionColumns(ctx context.Context, id int, columns []string) error {
+	if err := ps.PutRepo.DeleteForms(ctx, id); err != nil {
+		return err
+	}
+
 	return ps.PutRepo.PutInstitutionColumns(ctx, id, columns)
 }
 
-func (ps *PutService) PutMentor(ctx context.Context, id int, info string) error {
-	return ps.PutRepo.PutMentor(ctx, id, info)
+func (ps *PutService) PutMentor(ctx context.Context, id int, name string) error {
+	return ps.PutRepo.PutMentor(ctx, id, name)
 }

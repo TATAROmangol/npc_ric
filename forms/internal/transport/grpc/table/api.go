@@ -10,7 +10,7 @@ import (
 )
 
 type Former interface {
-	GetFormRows(ctx context.Context, id int) ([]string,  error)
+	GetFormRows(ctx context.Context, id int) ([][]string,  error)
 	GetFormColumns(ctx context.Context, id int) ([]string, error)
 }
 
@@ -36,13 +36,21 @@ func (a *Api) GetTable(ctx context.Context, req *tablepb.GetTableRequest) (*tabl
 		return nil, err
 	}
 
+	grpcRows := make([]*tablepb.Row, 0, len(rows))
+	for _, row := range rows {
+		grpcRow := &tablepb.Row{
+			Values: row,
+		}
+		grpcRows = append(grpcRows, grpcRow)
+	}
+
 	columns, err := a.Former.GetFormColumns(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &tablepb.GetTableResponse{
-		Rows:    rows,
+		Rows:    grpcRows,
 		Columns: columns,
 	}, nil
 }

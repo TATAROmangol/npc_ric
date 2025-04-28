@@ -51,10 +51,10 @@ func (mr *MockGetRepoMockRecorder) GetFormColumns(ctx, id interface{}) *gomock.C
 }
 
 // GetFormRows mocks base method.
-func (m *MockGetRepo) GetFormRows(ctx context.Context, id int) ([]string, error) {
+func (m *MockGetRepo) GetFormRows(ctx context.Context, id int) ([][]string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetFormRows", ctx, id)
-	ret0, _ := ret[0].([]string)
+	ret0, _ := ret[0].([][]string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

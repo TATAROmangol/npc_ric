@@ -59,10 +59,10 @@ func (p *Post) PostMentor(ctx context.Context, name string) (int, error) {
 	return id, nil
 }
 
-func (p *Post) PostForm(ctx context.Context, info []string, institutionId int, mentorId int) (int, error) {
+func (p *Post) PostForm(ctx context.Context, info []string, institutionId int) (int, error) {
 	stmt, err := p.db.Prepare(`
-	INSERT INTO forms (info, institution_id, mentor_id) 
-	VALUES ($1, $2, $3) 
+	INSERT INTO forms (info, institution_id) 
+	VALUES ($1, $2) 
 	RETURNING id
 	`)
 	if err != nil {
@@ -72,7 +72,7 @@ func (p *Post) PostForm(ctx context.Context, info []string, institutionId int, m
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRowContext(ctx, pq.Array(info), institutionId, mentorId).Scan(&id)
+	err = stmt.QueryRowContext(ctx, pq.Array(info), institutionId).Scan(&id)
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrScanRow, err)
 		return -1, err

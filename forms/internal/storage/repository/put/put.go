@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"forms/internal/storage/repository/errors"
 	"forms/pkg/logger"
+
+	"github.com/lib/pq"
 )
 
 type Put struct {
@@ -27,7 +29,7 @@ func (p *Put) PutInstitutionInfo(ctx context.Context, id int, name string, inn i
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(name, inn, id)
+	_, err = stmt.Exec(id, name, inn)
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrExecStatement, err)
 		return err
@@ -46,7 +48,7 @@ func (p *Put) PutInstitutionColumns(ctx context.Context, id int, columns []strin
 		return err
 	}
 	defer stmt.Close()
-	_, err = stmt.Exec(columns, id)
+	_, err = stmt.Exec(id, pq.Array(columns))
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrExecStatement, err)
 		return err 
@@ -54,7 +56,7 @@ func (p *Put) PutInstitutionColumns(ctx context.Context, id int, columns []strin
 	return nil
 }
 
-func (p *Put) PutMentor(ctx context.Context, id int, info string) error {
+func (p *Put) PutMentor(ctx context.Context, id int, name string) error {
 	stmt, err := p.db.Prepare(`
 	UPDATE mentors 
 	SET info = $2
@@ -66,7 +68,7 @@ func (p *Put) PutMentor(ctx context.Context, id int, info string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(info, id)
+	_, err = stmt.Exec(id, name)
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrExecStatement, err)
 		return err

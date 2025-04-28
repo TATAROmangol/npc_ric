@@ -12,7 +12,7 @@ type GetRepo interface {
 	GetMentors(ctx context.Context) ([]entities.Mentor, error)
 	GetInstitutionFromINN(ctx context.Context, inn int) (entities.Institution, error)
 	GetFormColumns(ctx context.Context, id int) ([]string, error)
-	GetFormRows(ctx context.Context, id int) ([]string, error)
+	GetFormRows(ctx context.Context, id int) ([][]string, error)
 }
 
 type GetService struct {
@@ -41,6 +41,6 @@ func (gs *GetService) GetFormColumns(ctx context.Context, id int) ([]string, err
 	return gs.GetRepo.GetFormColumns(ctx, id)
 }
 
-func (gs *GetService) GetFormRows(ctx context.Context, id int) ([]string, error) {
+func (gs *GetService) GetFormRows(ctx context.Context, id int) ([][]string, error) {
 	return gs.GetRepo.GetFormRows(ctx, id)
 }

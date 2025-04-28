@@ -52,3 +52,22 @@ func (d *Delete) DeleteMentor(ctx context.Context, mentorId int) error {
 	}
 	return nil
 }
+
+func (d *Delete) DeleteForms(ctx context.Context, institution_id int) error{
+	stmt, err := d.db.Prepare(`
+	DELETE FROM forms
+	WHERE institution_id = $1
+	`)
+	if err != nil {
+		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrCreateStatement, err)
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(institution_id)
+	if err != nil {
+		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrExecStatement, err)
+		return err
+	}
+	return nil
+}

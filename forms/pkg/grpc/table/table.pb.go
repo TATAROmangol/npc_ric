@@ -68,7 +68,7 @@ func (x *GetTableRequest) GetInstitutionId() int32 {
 type GetTableResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Columns       []string               `protobuf:"bytes,1,rep,name=columns,proto3" json:"columns,omitempty"`
-	Rows          []string               `protobuf:"bytes,2,rep,name=rows,proto3" json:"rows,omitempty"`
+	Rows          []*Row                 `protobuf:"bytes,2,rep,name=rows,proto3" json:"rows,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -110,9 +110,53 @@ func (x *GetTableResponse) GetColumns() []string {
 	return nil
 }
 
-func (x *GetTableResponse) GetRows() []string {
+func (x *GetTableResponse) GetRows() []*Row {
 	if x != nil {
 		return x.Rows
+	}
+	return nil
+}
+
+type Row struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Values        []string               `protobuf:"bytes,1,rep,name=values,proto3" json:"values,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Row) Reset() {
+	*x = Row{}
+	mi := &file_table_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Row) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Row) ProtoMessage() {}
+
+func (x *Row) ProtoReflect() protoreflect.Message {
+	mi := &file_table_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Row.ProtoReflect.Descriptor instead.
+func (*Row) Descriptor() ([]byte, []int) {
+	return file_table_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Row) GetValues() []string {
+	if x != nil {
+		return x.Values
 	}
 	return nil
 }
@@ -123,10 +167,13 @@ const file_table_proto_rawDesc = "" +
 	"\n" +
 	"\vtable.proto\x12\x05table\"8\n" +
 	"\x0fGetTableRequest\x12%\n" +
-	"\x0einstitution_id\x18\x01 \x01(\x05R\rinstitutionId\"@\n" +
+	"\x0einstitution_id\x18\x01 \x01(\x05R\rinstitutionId\"L\n" +
 	"\x10GetTableResponse\x12\x18\n" +
-	"\acolumns\x18\x01 \x03(\tR\acolumns\x12\x12\n" +
-	"\x04rows\x18\x02 \x03(\tR\x04rows2K\n" +
+	"\acolumns\x18\x01 \x03(\tR\acolumns\x12\x1e\n" +
+	"\x04rows\x18\x02 \x03(\v2\n" +
+	".table.RowR\x04rows\"\x1d\n" +
+	"\x03Row\x12\x16\n" +
+	"\x06values\x18\x01 \x03(\tR\x06values2K\n" +
 	"\fTableService\x12;\n" +
 	"\bGetTable\x12\x16.table.GetTableRequest\x1a\x17.table.GetTableResponseB#Z!github.com/npc_ric/pkg/grpc/tableb\x06proto3"
 
@@ -142,19 +189,21 @@ func file_table_proto_rawDescGZIP() []byte {
 	return file_table_proto_rawDescData
 }
 
-var file_table_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_table_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_table_proto_goTypes = []any{
 	(*GetTableRequest)(nil),  // 0: table.GetTableRequest
 	(*GetTableResponse)(nil), // 1: table.GetTableResponse
+	(*Row)(nil),              // 2: table.Row
 }
 var file_table_proto_depIdxs = []int32{
-	0, // 0: table.TableService.GetTable:input_type -> table.GetTableRequest
-	1, // 1: table.TableService.GetTable:output_type -> table.GetTableResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2, // 0: table.GetTableResponse.rows:type_name -> table.Row
+	0, // 1: table.TableService.GetTable:input_type -> table.GetTableRequest
+	1, // 2: table.TableService.GetTable:output_type -> table.GetTableResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_table_proto_init() }
@@ -168,7 +217,7 @@ func file_table_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_table_proto_rawDesc), len(file_table_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

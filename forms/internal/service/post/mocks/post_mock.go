@@ -35,18 +35,18 @@ func (m *MockPostRepo) EXPECT() *MockPostRepoMockRecorder {
 }
 
 // PostForm mocks base method.
-func (m *MockPostRepo) PostForm(ctx context.Context, info []string, institutionId, mentorId int) (int, error) {
+func (m *MockPostRepo) PostForm(ctx context.Context, info []string, institutionId int) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PostForm", ctx, info, institutionId, mentorId)
+	ret := m.ctrl.Call(m, "PostForm", ctx, info, institutionId)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // PostForm indicates an expected call of PostForm.
-func (mr *MockPostRepoMockRecorder) PostForm(ctx, info, institutionId, mentorId interface{}) *gomock.Call {
+func (mr *MockPostRepoMockRecorder) PostForm(ctx, info, institutionId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostForm", reflect.TypeOf((*MockPostRepo)(nil).PostForm), ctx, info, institutionId, mentorId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PostForm", reflect.TypeOf((*MockPostRepo)(nil).PostForm), ctx, info, institutionId)
 }
 
 // PostInstitution mocks base method.

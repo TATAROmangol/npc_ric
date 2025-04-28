@@ -22,10 +22,10 @@ func TestGetService_GetInstitutions(t *testing.T) {
 	type MockBehavior func()
 
 	tests := []struct {
-		name    string
-		MockBehavior   MockBehavior
-		want    []entities.Institution
-		wantErr bool
+		name         string
+		MockBehavior MockBehavior
+		want         []entities.Institution
+		wantErr      bool
 	}{
 		{
 			name: "valid institutions",
@@ -79,22 +79,22 @@ func TestGetService_GetMentors(t *testing.T) {
 	type MockBehavior func()
 
 	tests := []struct {
-		name    string
-		MockBehavior   MockBehavior
-		want    []entities.Mentor
-		wantErr bool
+		name         string
+		MockBehavior MockBehavior
+		want         []entities.Mentor
+		wantErr      bool
 	}{
 		{
 			name: "valid mentors",
 			MockBehavior: func() {
 				repo.EXPECT().GetMentors(gomock.Any()).Return([]entities.Mentor{
-					{Id: 1, Info: "Mentor 1"},
-					{Id: 2, Info: "Mentor 2"},
+					{Id: 1, Name: "Mentor 1"},
+					{Id: 2, Name: "Mentor 2"},
 				}, nil)
 			},
 			want: []entities.Mentor{
-				{Id: 1, Info: "Mentor 1"},
-				{Id: 2, Info: "Mentor 2"},
+				{Id: 1, Name: "Mentor 1"},
+				{Id: 2, Name: "Mentor 2"},
 			},
 			wantErr: false,
 		},
@@ -136,27 +136,27 @@ func TestGetService_GetInstitutionFromINN(t *testing.T) {
 	type MockBehavior func(inn int)
 
 	tests := []struct {
-		name    string
-		MockBehavior   MockBehavior
-		inn     int
-		want    entities.Institution
-		wantErr bool
+		name         string
+		MockBehavior MockBehavior
+		inn          int
+		want         entities.Institution
+		wantErr      bool
 	}{
 		{
 			name: "valid institution",
 			MockBehavior: func(inn int) {
 				repo.EXPECT().GetInstitutionFromINN(gomock.Any(), inn).Return(entities.Institution{
-					Id:   1,
-					Name: "Institution 1",
-					INN:  inn,
+					Id:      1,
+					Name:    "Institution 1",
+					INN:     inn,
 					Columns: []string{"Column1", "Column2"},
 				}, nil)
 			},
 			inn: 1234567890,
 			want: entities.Institution{
-				Id:   1,
-				Name: "Institution 1",
-				INN:  1234567890,
+				Id:      1,
+				Name:    "Institution 1",
+				INN:     1234567890,
 				Columns: []string{"Column1", "Column2"},
 			},
 			wantErr: false,
@@ -200,18 +200,18 @@ func TestGetService_GetFormColumns(t *testing.T) {
 	type MockBehavior func(id int)
 
 	tests := []struct {
-		name    string
-		MockBehavior   MockBehavior
-		id     int
-		want    []string
-		wantErr bool
+		name         string
+		MockBehavior MockBehavior
+		id           int
+		want         []string
+		wantErr      bool
 	}{
 		{
 			name: "valid columns",
 			MockBehavior: func(id int) {
 				repo.EXPECT().GetFormColumns(gomock.Any(), id).Return([]string{"Column1", "Column2"}, nil)
 			},
-			id:     1,
+			id:      1,
 			want:    []string{"Column1", "Column2"},
 			wantErr: false,
 		},
@@ -220,7 +220,7 @@ func TestGetService_GetFormColumns(t *testing.T) {
 			MockBehavior: func(id int) {
 				repo.EXPECT().GetFormColumns(gomock.Any(), id).Return(nil, errors.New("error getting columns"))
 			},
-			id:     0,
+			id:      0,
 			want:    nil,
 			wantErr: true,
 		},
@@ -254,18 +254,18 @@ func TestGetService_GetFormRows(t *testing.T) {
 	type MockBehavior func(id int)
 
 	tests := []struct {
-		name    string
-		MockBehavior   MockBehavior
-		id     int
-		want    []string
-		wantErr bool
+		name         string
+		MockBehavior MockBehavior
+		id           int
+		want         []string
+		wantErr      bool
 	}{
 		{
 			name: "valid rows",
 			MockBehavior: func(id int) {
 				repo.EXPECT().GetFormRows(gomock.Any(), id).Return([]string{"Row1", "Row2"}, nil)
 			},
-			id:     1,
+			id:      1,
 			want:    []string{"Row1", "Row2"},
 			wantErr: false,
 		},
@@ -274,7 +274,7 @@ func TestGetService_GetFormRows(t *testing.T) {
 			MockBehavior: func(id int) {
 				repo.EXPECT().GetFormRows(gomock.Any(), id).Return(nil, errors.New("error getting rows"))
 			},
-			id:     0,
+			id:      0,
 			want:    nil,
 			wantErr: true,
 		},

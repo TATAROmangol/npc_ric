@@ -3,10 +3,11 @@ package get
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"forms/internal/entities"
 	"forms/internal/storage/repository/errors"
 	"forms/pkg/logger"
+
+	"github.com/lib/pq"
 )
 
 type Get struct {
@@ -17,7 +18,7 @@ func NewGet(db *sql.DB) *Get {
 	return &Get{db}
 }
 
-func (g *Get) GetInstitutions(ctx context.Context) ([]entities.Institution, error){
+func (g *Get) GetInstitutions(ctx context.Context) ([]entities.Institution, error) {
 	stmt, err := g.db.Prepare(`
 	SELECT id, name, inn
 	FROM institutions
@@ -42,15 +43,16 @@ func (g *Get) GetInstitutions(ctx context.Context) ([]entities.Institution, erro
 			logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrScanRow, err)
 			return nil, err
 		}
+
 		institutions = append(institutions, institution)
 	}
 
 	return institutions, nil
 }
 
-func (g *Get) GetMentors(ctx context.Context) ([]entities.Mentor, error){
+func (g *Get) GetMentors(ctx context.Context) ([]entities.Mentor, error) {
 	stmt, err := g.db.Prepare(`
-	SELECT id, info
+	SELECT *
 	FROM mentors
 	`)
 	if err != nil {
@@ -68,7 +70,7 @@ func (g *Get) GetMentors(ctx context.Context) ([]entities.Mentor, error){
 	var mentors []entities.Mentor
 	for rows.Next() {
 		var mentor entities.Mentor
-		err = rows.Scan(&mentor.Id, &mentor.Info)
+		err = rows.Scan(&mentor.Id, &mentor.Name)
 		if err != nil {
 			logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrScanRow, err)
 			return nil, err
@@ -79,7 +81,7 @@ func (g *Get) GetMentors(ctx context.Context) ([]entities.Mentor, error){
 	return mentors, nil
 }
 
-func (g *Get) GetInstitutionFromINN(ctx context.Context, inn int) (entities.Institution, error){
+func (g *Get) GetInstitutionFromINN(ctx context.Context, inn int) (entities.Institution, error) {
 	stmt, err := g.db.Prepare(`
 	SELECT id, name, inn
 	FROM institutions
@@ -101,7 +103,7 @@ func (g *Get) GetInstitutionFromINN(ctx context.Context, inn int) (entities.Inst
 	return institution, nil
 }
 
-func (g *Get) GetFormColumns(ctx context.Context, id int) ([]string, error){
+func (g *Get) GetFormColumns(ctx context.Context, id int) ([]string, error) {
 	stmt, err := g.db.Prepare(`
 	SELECT columns
 	FROM institutions
@@ -114,7 +116,7 @@ func (g *Get) GetFormColumns(ctx context.Context, id int) ([]string, error){
 	defer stmt.Close()
 
 	var columns []string
-	err = stmt.QueryRow(id).Scan(&columns)
+	err = stmt.QueryRow(id).Scan(pq.Array(&columns))
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrScanRow, err)
 		return nil, err
@@ -123,25 +125,35 @@ func (g *Get) GetFormColumns(ctx context.Context, id int) ([]string, error){
 	return columns, nil
 }
 
-func (g *Get) GetFormRows(ctx context.Context, id int) ([]string, error){
-	// stmt, err := s.db.Prepare(`
-	// SELECT info
-	// FROM institutions
-	// WHERE id = $1
-	// `)
-	// if err != nil {
-	// 	logger.GetFromCtx(ctx).ErrorContext(ctx, ErrCreateStatement, err)
-	// 	return nil, err
-	// }
-	// defer stmt.Close()
+func (g *Get) GetFormRows(ctx context.Context, institution_id int) ([][]string, error) {
+	stmt, err := g.db.Prepare(`
+	SELECT info
+	FROM forms
+	WHERE id = $1
+	`)
+	if err != nil {
+		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrCreateStatement, err)
+		return nil, err
+	}
+	defer stmt.Close()
 
-	// var rows []string
-	// err = stmt.QueryRow(id).Scan(&rows)
-	// if err != nil {
-	// 	logger.GetFromCtx(ctx).ErrorContext(ctx, ErrScanRow, err)
-	// 	return nil, err
-	// }
+	rows, err := stmt.Query(institution_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
-	// return rows, nil
-	return nil, fmt.Errorf("not implemented")	
+	res := make([][]string, 0)
+	for rows.Next() {
+		var row []string
+		err = rows.Scan(pq.Array(&row))
+		if err != nil {
+			logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrScanRow, err)
+			return nil, err
+		}
+
+		res = append(res, row)
+	}
+
+	return res, nil
 }

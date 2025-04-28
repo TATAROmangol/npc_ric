@@ -10,7 +10,7 @@ import (
 type Poster interface {
 	PostInstitution(ctx context.Context, name string, inn int, columns []string) (int, error)
 	PostMentor(ctx context.Context, name string) (int, error)
-	PostForm(ctx context.Context, info []string, institutionId int, mentorId int) (int, error)
+	PostForm(ctx context.Context, info []string, institutionId int) (int, error)
 }
 
 type PostHandler struct {
@@ -79,7 +79,7 @@ func (h *PostHandler) PostForm() http.Handler {
 		}
 		defer r.Body.Close()
 
-		id, err := h.srv.PostForm(r.Context(), req.Info, req.InstitutionId, req.MentorId)
+		id, err := h.srv.PostForm(r.Context(), req.Info, req.InstitutionId)
 		if err != nil {
 			http.Error(w, "invalid request", http.StatusBadGateway)
 			return
