@@ -21,7 +21,6 @@ type PostMentorResponse struct {
 type PostFormRequest struct {
 	Info          []string `json:"info"`
 	InstitutionId int      `json:"institution_id"`
-	MentorId      int      `json:"mentor_id"`
 }
 
 type PostFormResponse struct {
