@@ -22,8 +22,8 @@ def insert_template(template_path: str, name: str):
 if __name__ == "__main__":
     init_db()
 
-    TEMPLATE_NAME = "test_template"
-    TEMPLATE_PATH = "python/template.docx"
+    TEMPLATE_NAME = "contractct"
+    TEMPLATE_PATH = "python/contract.docx"
 
     if not os.path.exists(TEMPLATE_PATH):
         print(f"Шаблон не найден: {TEMPLATE_PATH}")
