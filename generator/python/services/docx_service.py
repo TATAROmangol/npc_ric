@@ -1,5 +1,5 @@
-from db.models import Template, GeneratedDocument
-from db.database import SessionLocal
+from python.db.models import Template, GeneratedDocument
+from python.db.database import SessionLocal
 from docxtpl import DocxTemplate
 import io
 # import json

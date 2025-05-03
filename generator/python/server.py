@@ -1,9 +1,9 @@
 from concurrent import futures
 import grpc
-from db.database import SessionLocal
-from db.models import Template
-from generated import docx_generator_pb2, docx_generator_pb2_grpc
-from services.docx_service import DocxGeneratorService
+from python.db.database import SessionLocal
+from python.db.models import Template
+from python.generated import docx_generator_pb2, docx_generator_pb2_grpc
+from python.services.docx_service import DocxGeneratorService
 
 
 class DocxGeneratorServicer(docx_generator_pb2_grpc.DocxGeneratorServicer):
@@ -11,7 +11,7 @@ class DocxGeneratorServicer(docx_generator_pb2_grpc.DocxGeneratorServicer):
         db = SessionLocal()
         try:
             print(f"'{request.name}' {len(request.docx_content)} bytes")
-            
+
             if not request.docx_content:
                 context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
                 return docx_generator_pb2.Response(status="Empty file content")
@@ -37,28 +37,34 @@ class DocxGeneratorServicer(docx_generator_pb2_grpc.DocxGeneratorServicer):
     def GenerateDocx(self, request, context):
         db = SessionLocal()
         try:
-            template = db.query(Template).filter_by(name=request.template_name).first()
+            template = db.query(Template).filter_by(
+                name=request.template_name).first()
             if not template:
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 return docx_generator_pb2.GenerateResponse()
 
             data = {
-                col: [row.values[i] for row in request.table.rows]
-                for i, col in enumerate(request.table.columns)
-            }
+                    "rows": [
+                        {
+                            col: row.values[i]
+                            for i, col in enumerate(request.table.columns)
+                        }
+                        for row in request.table.rows
+                            ]
+                    }
 
             content = DocxGeneratorService.generate_docx(
                 template_name=request.template_name,
                 data=data
             )
-            
+
             if not content:
                 context.set_code(grpc.StatusCode.INTERNAL)
                 return docx_generator_pb2.GenerateResponse()
 
             return docx_generator_pb2.GenerateResponse(result_docx=content)
         except Exception as e:
-            print(f"Error in GenerateDocx: {str(e)}")  
+            print(f"Error in GenerateDocx: {str(e)}")
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(f"Internal error: {str(e)}")
             return docx_generator_pb2.GenerateResponse()
@@ -69,7 +75,7 @@ class DocxGeneratorServicer(docx_generator_pb2_grpc.DocxGeneratorServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     docx_generator_pb2_grpc.add_DocxGeneratorServicer_to_server(
-        DocxGeneratorServicer(),  
+        DocxGeneratorServicer(),
         server
     )
     server.add_insecure_port("[::]:50051")

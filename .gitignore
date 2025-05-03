@@ -11,3 +11,4 @@ __pycache__/
 *.docx
 
 testss.py
+test_generator.py

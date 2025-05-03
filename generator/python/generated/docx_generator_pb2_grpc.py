@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import generated.docx_generator_pb2 as docx__generator__pb2
+import python.generated.docx_generator_pb2 as docx__generator__pb2
 
 
 class DocxGeneratorStub(object):
