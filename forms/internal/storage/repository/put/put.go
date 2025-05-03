@@ -59,7 +59,7 @@ func (p *Put) PutInstitutionColumns(ctx context.Context, id int, columns []strin
 func (p *Put) PutMentor(ctx context.Context, id int, name string) error {
 	stmt, err := p.db.Prepare(`
 	UPDATE mentors 
-	SET info = $2
+	SET name = $2
 	WHERE id = $1
 	`)
 	if err != nil {

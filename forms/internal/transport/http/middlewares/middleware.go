@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 )
 
+//go:generate mockgen -source=middleware.go -destination=mocks/middlewares.go -package=mocks
+
 type Verifier interface {
 	Verify(ctx context.Context, token string) (bool, error)
 }

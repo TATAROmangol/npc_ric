@@ -42,6 +42,14 @@ func TestDelete_DeleteInstitution(t *testing.T) {
 			if len(institutions) != 2 {
 				t.Errorf("Get.GetInstitutions() length got = %v, want %v", len(institutions), 2)
 			}
+
+			forms, err := getRepo.GetFormRows(ctx, tt.institutionId)
+			if err != nil {
+				t.Errorf("Get.GetFormRows() error = %v", err)
+			}
+			if len(forms) != 0 {
+				t.Errorf("Get.GetFormRows() length got = %v, want %v", len(forms), 0)
+			}
 		})
 	}
 }
