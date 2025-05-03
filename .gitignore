@@ -1,2 +1,14 @@
 venv/
 .venv/
+config.py
+
+__pycache__/
+.__pycache__/
+*.py[cod]
+
+.env
+
+*.docx
+
+testss.py
+test_generator.py
