@@ -7,7 +7,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o ./forms ./cmd/main.go
 
 FROM alpine:3.21
 WORKDIR /app 
-
 COPY --from=builder /app/forms ./bin/
-
+COPY --from=builder /app/internal/storage/migrations ./internal/storage/migrations
 CMD ["./bin/forms"]

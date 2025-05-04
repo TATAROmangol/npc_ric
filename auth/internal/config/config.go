@@ -21,11 +21,16 @@ type Config struct {
 func MustLoad() *Config {
 	var cfg Config
 	
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("not found env: %v", err)
-	}
+	godotenv.Load()
+
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalf("Error parse .env file: %v", err)
 	}
+
+	var test Config
+	if cfg == test{
+		log.Fatalf("Error load cfg file")
+	}
+
 	return &cfg
 }

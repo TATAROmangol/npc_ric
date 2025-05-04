@@ -12,7 +12,6 @@ type Migrator struct{
 	m *migrate.Migrate
 }
 
-//dirPath - dir with migrate files
 func NewMigrator(dirPath string, cfg Config) (*Migrator, error){
 	m, err := migrate.New(dirPath, cfg.GetMigrationConnString())
 	if err != nil{
@@ -23,8 +22,6 @@ func NewMigrator(dirPath string, cfg Config) (*Migrator, error){
 }
 
 func (mig *Migrator) Up() error {
-	defer mig.m.Close()
-
 	err := mig.m.Up()
 	if err == nil || err == migrate.ErrNoChange{
 		return nil
