@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Интерфейс Администратора</title>
+    <link rel="stylesheet" href="C:\Users\Кирилл\Desktop\Проектный практикум. Весна 2025\Frontend\css\style.css"/>
+</head>
+<body>
+    <header>
+        <h1>Партнёры</h1>
+    </header>
+    <main>
+        <h3>Список учебных заведений партнёров</h3>
+        <div class="list" id="institutionsList">
+            <!-- Список вузов будет здесь -->
+        </div>
+
+        <div class="action-panel hidden" id="actionPanel">
+            <button id="generateDocBtn">Сформировать документ</button>
+            <button id="editFormBtn">Редактировать форму студента</button>
+            <button id="deleteUniversityBtn">Удалить вуз</button>
+        </div>
+
+        <div class="main-button-panel">
+            <button id="openModalBtn">Добавить университет</button> 
+            <button onclick="window.location.href='edit_supervisor.html'">Редактировать руководителей практики</button>
+        </div>
+
+        <!-- Модальное окно добавления вуза -->
+        <div id="addInstitutionModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Добавить университет</h2>
+                    <span class="close-btn">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="institutionName" placeholder="Название университета">
+                    <input type="text" id="institutionINN" placeholder="ИНН">
+                    <input type="text" id="institutionAddress" placeholder="Адрес">
+                    <input type="text" id="institutionNumber" placeholder="Телефон">
+                </div>
+                <div class="modal-footer">
+                    <button id="cancelBtn">Отмена</button>
+                    <button id="submitBtn">Сохранить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно редактирования формы -->
+        <div id="formEditorModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Редактор формы студента для <span id="currentUniversityName"></span></h2>
+                    <span class="close-form-btn">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div id="formFieldsContainer">
+                    </div>
+                    
+                </div>
+                <div class="modal-footer">
+                    <button id="addFieldBtn">Добавить поле</button>
+                    <button id="cancelFormBtn">Отмена</button>
+                    <button id="saveFormBtn">Сохранить форму</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="js/script.js"></script>
+</body>
+</html>
