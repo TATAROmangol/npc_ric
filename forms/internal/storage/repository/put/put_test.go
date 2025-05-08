@@ -116,28 +116,21 @@ func TestPut_PutMentor(t *testing.T) {
 	l := logger.New()
 	ctx = logger.InitFromCtx(ctx, l)
 
-	tests := []struct {
-		name    string
-		Name string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if err := repo.PutMentor(ctx, 1, tt.Name); (err != nil) != tt.wantErr {
-				t.Errorf("Put.PutMentor() error = %v, wantErr %v", err, tt.wantErr)
-			}
+	t.Run("first", func(t *testing.T) {
+		if err := repo.PutMentor(ctx, 1, "first"); err != nil {
+			t.Errorf("Put.PutMentor() error = %v", err)
+		}
 
-			getRepo := get.NewGet(db)
-			mentors, err := getRepo.GetMentors(ctx)
-			if err != nil {
-				t.Errorf("Get.GetMentor() error = %v", err)
-				return
+		getRepo := get.NewGet(db)
+		mentors, err := getRepo.GetMentors(ctx)
+		if err != nil {
+			t.Errorf("Get.PutMentor() error = %v", err)
+			return
+		}
+		for _, m := range mentors {
+			if m.Id == 1 && m.Name != "first" {
+				t.Errorf("Get.PutMentor() id got = %v, want %v", m.Id, 1)
 			}
-			if mentors[0].Name != tt.Name {
-				t.Errorf("Get.GetMentor() info got = %v, want %v", mentors[0].Name, tt.Name)
-			}
-		})
-	}
+		}
+	})
 }

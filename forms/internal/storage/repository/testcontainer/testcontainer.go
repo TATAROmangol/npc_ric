@@ -22,9 +22,8 @@ const (
 func SetupTestDB() (*sql.DB, func(), error) {
 	ctx := context.Background()
 	
-	// Запускаем контейнер с PostgreSQL
-	container, err := testcontainersPostgres.RunContainer(ctx,
-		testcontainers.WithImage("postgres:15-alpine"),
+	container, err := testcontainersPostgres.Run(ctx,
+		"postgres:15-alpine",
 		testcontainersPostgres.WithDatabase("testdb"),
 		testcontainersPostgres.WithUsername("user"),
 		testcontainersPostgres.WithPassword("password"),
@@ -37,32 +36,26 @@ func SetupTestDB() (*sql.DB, func(), error) {
 		return nil, nil, fmt.Errorf("failed to start container: %w", err)
 	}
 
-	// Получаем строку подключения
 	connStr, err := container.ConnectionString(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get connection string: %w", err)
 	}
 
-	// Добавляем параметры
 	connStr = connStr + " sslmode=disable"
 
-	// Подключаемся к БД
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Проверяем подключение
 	if err := db.Ping(); err != nil {
 		return nil, nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	// Применяем миграции
 	if err := applyMigrations(db); err != nil {
 		return nil, nil, fmt.Errorf("failed to apply migrations: %w", err)
 	}
 
-	// Функция очистки
 	cleanup := func() {
 		_ = db.Close()
 		if err := container.Terminate(ctx); err != nil {
@@ -74,13 +67,11 @@ func SetupTestDB() (*sql.DB, func(), error) {
 }
 
 func applyMigrations(db *sql.DB) error {
-	// Создаем драйвер для миграций
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create migration driver: %w", err)
 	}
 
-	// Инициализируем миграции
 	m, err := migrate.NewWithDatabaseInstance(
 		migrationPath,
 		"postgres", 
@@ -90,7 +81,6 @@ func applyMigrations(db *sql.DB) error {
 		return fmt.Errorf("failed to initialize migrations: %w", err)
 	}
 
-	// Применяем все миграции вверх
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return fmt.Errorf("failed to apply migrations: %w", err)
 	}
