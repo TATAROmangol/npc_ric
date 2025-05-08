@@ -16,3 +16,5 @@ class GeneratedDocument(Base):
     id = Column(Integer, primary_key=True)
     template_id = Column(Integer)
     file_content = Column(LargeBinary)
+    filename = Column(String)
+

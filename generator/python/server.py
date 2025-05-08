@@ -1,88 +1,77 @@
-from concurrent import futures
-import grpc
-from python.db.database import SessionLocal
-from python.db.models import Template
-from python.generated import docx_generator_pb2, docx_generator_pb2_grpc
-from python.services.docx_service import DocxGeneratorService
+from fastapi import FastAPI, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+import uuid
+from db.database import SessionLocal
+from db.models import Template, GeneratedDocument
+from services.docx_service import generate_docx_from_template
+from grpc_clients.table_client import get_table_data
+import shutil
+
+app = FastAPI()
 
 
-class DocxGeneratorServicer(docx_generator_pb2_grpc.DocxGeneratorServicer):
-    def UploadTemplate(self, request, context):
-        db = SessionLocal()
-        try:
-            print(f"'{request.name}' {len(request.docx_content)} bytes")
-
-            if not request.docx_content:
-                context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
-                return docx_generator_pb2.Response(status="Empty file content")
-
-            if db.query(Template).filter_by(name=request.name).first():
-                context.set_code(grpc.StatusCode.ALREADY_EXISTS)
-                return docx_generator_pb2.Response(status="Template exists")
-
-            db.add(Template(
-                name=request.name,
-                content=request.docx_content
-            ))
-            db.commit()
-            return docx_generator_pb2.Response(status="OK")
-        except Exception as e:
-            db.rollback()
-            print(f"Upload error: {str(e)}")
-            context.set_code(grpc.StatusCode.INTERNAL)
-            return docx_generator_pb2.Response(status=f"Error: {str(e)}")
-        finally:
-            db.close()
-
-    def GenerateDocx(self, request, context):
-        db = SessionLocal()
-        try:
-            template = db.query(Template).filter_by(
-                name=request.template_name).first()
-            if not template:
-                context.set_code(grpc.StatusCode.NOT_FOUND)
-                return docx_generator_pb2.GenerateResponse()
-
-            data = {
-                    "rows": [
-                        {
-                            col: row.values[i]
-                            for i, col in enumerate(request.table.columns)
-                        }
-                        for row in request.table.rows
-                            ]
-                    }
-
-            content = DocxGeneratorService.generate_docx(
-                template_name=request.template_name,
-                data=data
-            )
-
-            if not content:
-                context.set_code(grpc.StatusCode.INTERNAL)
-                return docx_generator_pb2.GenerateResponse()
-
-            return docx_generator_pb2.GenerateResponse(result_docx=content)
-        except Exception as e:
-            print(f"Error in GenerateDocx: {str(e)}")
-            context.set_code(grpc.StatusCode.INTERNAL)
-            context.set_details(f"Internal error: {str(e)}")
-            return docx_generator_pb2.GenerateResponse()
-        finally:
-            db.close()
+class GenerateRequest(BaseModel):
+    template_name: str
+    institution_id: int
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    docx_generator_pb2_grpc.add_DocxGeneratorServicer_to_server(
-        DocxGeneratorServicer(),
-        server
-    )
-    server.add_insecure_port("[::]:50051")
-    server.start()
-    print("Server running on port 50051")
-    server.wait_for_termination()
+@app.post("/generate")
+def generate(request: GenerateRequest):
+    db = SessionLocal()
+    try:
+        template = db.query(Template).filter_by(name=request.template_name).first()
+        if not template:
+            raise HTTPException(status_code=404, detail="Template not found")
+        tmp_path = f"/tmp/{uuid.uuid4()}.docx"
+        with open(tmp_path, "wb") as f:
+            f.write(template.content)
+
+        output_path = f"/tmp/{uuid.uuid4()}_gen.docx"
+        generate_docx_from_template(tmp_path, output_path, request.institution_id)
+
+        with open(output_path, "rb") as f:
+            generated_bytes = f.read()
+
+        doc_id = str(uuid.uuid4())
+        db_doc = GeneratedDocument(template_id=template.id, file_content=generated_bytes, filename=f"{doc_id}.docx")
+        db.add(db_doc)
+        db.commit()
+
+        return {"download_url": f"/download/{db_doc.id}"}
+    finally:
+        db.close()
 
 
-if __name__ == "__main__":
-    serve()
+
+@app.get("/download/{doc_id}")
+def download(doc_id: int):
+    db = SessionLocal()
+    try:
+        doc = db.query(GeneratedDocument).filter_by(id=doc_id).first()
+        if not doc:
+            raise HTTPException(status_code=404, detail="Generated file not found")
+
+        return FileResponse(
+            path_or_file=doc.file_content,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            filename=doc.filename,
+            headers={"Content-Disposition": f"attachment; filename={doc.filename}"}
+        )
+    finally:
+        db.close()
+
+
+
+@app.post("/upload-template/")
+async def upload_template(name: str = Form(...), file: UploadFile = File(...)):
+    db = SessionLocal()
+    try:
+        content = await file.read()
+        template = Template(name=name, content=content)
+        db.add(template)
+        db.commit()
+        return {"message": "Template uploaded to DB"}
+    finally:
+        db.close()
+
