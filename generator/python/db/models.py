@@ -17,4 +17,3 @@ class GeneratedDocument(Base):
     template_id = Column(Integer)
     file_content = Column(LargeBinary)
     filename = Column(String)
-
