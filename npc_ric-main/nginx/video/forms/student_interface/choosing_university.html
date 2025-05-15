@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Динамическая форма практики</title>
+    <link rel="stylesheet" href="C:\Users\Кирилл\Desktop\Проектный практикум. Весна 2025\Frontend\css\style.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
+</head>
+<body>
+    <header>
+       <h1>Подача заявления</h1>
+    </header>
+    <main class="student-form">
+        <div class="form-container">
+            <div class="form-group">
+                <label for="university-select">Университет:</label>
+                <select id="university-select" class="form-control">
+                    <option value="">Выберите ВУЗ</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="supervisor-select">Руководитель практики:</label>
+                <select id="supervisor-select" class="form-control">
+                    <option value="">Выберите руководителя практики</option>
+                </select>
+            </div>
+            <form id="dynamic-form">
+                <div id="form-fields-container"></div>
+                
+                <div class="buttons">
+                    <button onclick="window.location.href='home_page.html'">Назад</button>
+                    <button type="submit" id="submit-btn" class="hidden">Отправить</button>
+                </div>
+            </form>
+        </div>
+        
+    </main>
+    <script src="js/script.js"></script>
+</body>
+</html>
