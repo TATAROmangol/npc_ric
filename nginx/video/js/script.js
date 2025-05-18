@@ -1,5 +1,5 @@
 class ApiService {
-    constructor(baseUrl = 'http://forms:8080/forms/;') {
+    constructor(baseUrl = 'http://forms:8080/forms/') {
         this.baseUrl = baseUrl;
     }
 
@@ -109,7 +109,7 @@ class ApiService {
     }
 }
 
-const apiService = new ApiService("http://forms:8080/admin/;"); 
+const apiService = new ApiService("/admin/api/"); 
 
 let institutions = [];
 let selectedInstitution = null;
