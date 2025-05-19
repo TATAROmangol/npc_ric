@@ -1,17 +1,20 @@
-from docx import Document
+from docxtpl import DocxTemplate, Subdoc
 import io
 from grpc_clients.table_client import get_table_data
 
 
-def generate_docx_from_template(
-        template_bytes: bytes,
-        institution_id: int) -> bytes:
+def generate_docx_from_template(template_bytes: bytes,
+                                institution_id: int) -> bytes:
     template_stream = io.BytesIO(template_bytes)
-    doc = Document(template_stream)
+    doc = DocxTemplate(template_stream)
 
-    table_data = get_table_data(institution_id)
-
-    table = doc.add_table(rows=1, cols=len(table_data["columns"]))
+    # table_data = get_table_data(institution_id)
+    table_data = {
+        "columns": ["Column 1", "Column 2"],
+        "rows": [["value 1", "value 2"], ["value 3", "value 4"]]
+        }
+    subdoc = doc.new_subdoc()
+    table = subdoc.add_table(rows=1, cols=len(table_data["columns"]))
     table.style = 'Table Grid'
 
     hdr_cells = table.rows[0].cells
@@ -20,9 +23,14 @@ def generate_docx_from_template(
 
     for row in table_data["rows"]:
         row_cells = table.add_row().cells
-        for i, cell_value in enumerate(row):
-            row_cells[i].text = cell_value
+        for i, val in enumerate(row):
+            row_cells[i].text = val
 
+    context = {
+        "table": subdoc
+    }
+
+    doc.render(context)
     output_stream = io.BytesIO()
     doc.save(output_stream)
     return output_stream.getvalue()

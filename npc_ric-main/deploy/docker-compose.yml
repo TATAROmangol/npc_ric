@@ -95,6 +95,20 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
+  
+  generator:
+    build:
+      context: ./generator/python
+      dockerfile: Dockerfile
+    container_name: fastapi-generator
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./generator/python/.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 
 volumes:
   pgdata:
