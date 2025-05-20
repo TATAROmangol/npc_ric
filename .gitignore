@@ -7,4 +7,6 @@ __pycache__/
 *.docx
 testss.py
 test_generator.py
+
 .DS_Store
+postgres_data/
