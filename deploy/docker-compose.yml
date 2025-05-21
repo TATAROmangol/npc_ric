@@ -7,6 +7,8 @@ services:
           condition: service_started
         forms:
           condition: service_started
+        generator:
+          condition: service_started
       ports:
         - "9000:9000"  
         - "80:80"      
@@ -49,6 +51,29 @@ services:
       FORMS_TABLE_GRPC_HOST: 0.0.0.0
       FORMS_AUTH_GRPC_PORT: ${FORMS_AUTH_GRPC_PORT}
       FORMS_AUTH_GRPC_HOST: nginx
+      PG_HOST: postgres
+      PG_PORT: ${PG_PORT}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB_NAME: ${PG_DB_NAME}
+      PG_SSL: ${PG_SSL}
+    expose:
+      - ${AUTH_HTTP_PORT}
+      - ${AUTH_GRPC_PORT}
+
+  generator:
+    container_name: generator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build: 
+      context: ../generator
+      dockerfile: Dockerfile
+    environment:
+      GEN_HTTP_PORT: 8082
+      GEN_HTTP_HOST: 0.0.0.0
+      GEN_GRPC_PORT: 9000
+      GEN_GRPC_HOST: 0.0.0.0
       PG_HOST: postgres
       PG_PORT: ${PG_PORT}
       PG_USER: ${PG_USER}
