@@ -8,11 +8,11 @@ def generate_docx_from_template(template_bytes: bytes,
     template_stream = io.BytesIO(template_bytes)
     doc = DocxTemplate(template_stream)
 
-    # table_data = get_table_data(institution_id)
-    table_data = {
-        "columns": ["Column 1", "Column 2"],
-        "rows": [["value 1", "value 2"], ["value 3", "value 4"]]
-        }
+    table_data = get_table_data(institution_id)
+    # table_data = {
+    #     "columns": ["Column 1", "Column 2"],
+    #     "rows": [["value 1", "value 2"], ["value 3", "value 4"]]
+    #     }
     subdoc = doc.new_subdoc()
     table = subdoc.add_table(rows=1, cols=len(table_data["columns"]))
     table.style = 'Table Grid'

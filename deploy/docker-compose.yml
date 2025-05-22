@@ -67,9 +67,11 @@ services:
       postgres:
         condition: service_healthy
     build: 
-      context: ../generator
+      context: ../generator/python
       dockerfile: Dockerfile
     environment:
+      FORMS_GRPC_HOST: forms
+      FORMS_GRPC_PORT: 50050
       GEN_HTTP_PORT: 8082
       GEN_HTTP_HOST: 0.0.0.0
       GEN_GRPC_PORT: 9000
@@ -83,6 +85,8 @@ services:
     expose:
       - ${AUTH_HTTP_PORT}
       - ${AUTH_GRPC_PORT}
+    ports:
+      - "8082:8000"
 
   postgres:
     image: postgres:latest
