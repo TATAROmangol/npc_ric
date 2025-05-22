@@ -2,9 +2,18 @@ from fastapi import FastAPI
 from routes.template_routes import router as template_router
 from routes.document_routes import router as document_router
 from db.database import init_db
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.on_event("startup")
 def on_startup():
