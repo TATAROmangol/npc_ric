@@ -15,11 +15,28 @@ class ApiService {
 
         const response = await fetch(url, options);
         if (!response.ok) {
-            const errorData = await response.json(); // Пытаемся прочитать JSON-ошибку
-            console.error('Детали ошибки:', errorData);
-            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            try {
+                // Пытаемся прочитать JSON-ошибку, если есть тело ответа
+                const errorData = await response.json();
+                console.error('Детали ошибки:', errorData);
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            } catch (e) {
+                // Если не удалось прочитать JSON (например, пустое тело ответа)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         }
-        return response.json();
+        
+        // Если статус 204 (No Content) - возвращаем null
+        if (response.status === 204) {
+            return null;
+        }
+        
+        // В остальных случаях пытаемся прочитать JSON
+        try {
+            return await response.json();
+        } catch (e) {
+            return null;
+        }
     }
 
     // Institution methods
@@ -65,23 +82,22 @@ class ApiService {
         });
     }
 
-    async deleteInstitution(inn) {
-        // Преобразуем ИНН в число
-        const innNumber = Number(inn);
-        if (isNaN(innNumber)) {
-            throw new Error('ИНН должен быть числом');
+    async deleteInstitution(id) {
+        if (!id) {
+            throw new Error('ID ВУЗа обязательно');
         }
 
-        return this.fetchWithAuth(`${this.adminBaseUrl}/delete/institution`, {
+        await this.fetchWithAuth(`${this.adminBaseUrl}/delete/institution`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                inn: innNumber  // Отправляем ИНН как число
-            })
+            body: JSON.stringify({ id })
         });
+        
+        // Если мы здесь, значит запрос выполнен успешно (status 200-299)
+        // Даже если сервер не вернул тело ответа
+        return true;
     }
 
     // Form methods
@@ -393,25 +409,22 @@ formFieldsContainer.addEventListener('click', (e) => {
 // Функция удаления вуза
 async function deleteInstitution() {
     if (!selectedInstitution) {
-        alert('Выберите университет для удаления');
+        alert('Выберите ВУЗ для удаления');
         return;
     }
-
-    if (!confirm(`Удалить университет "${selectedInstitution.name}"?`)) {
-        return;
-    }
-
-    try {
-        await apiService.deleteInstitution(selectedInstitution.inn);
-        
-        // Обновляем список
-        institutions = institutions.filter(inst => inst.inn !== selectedInstitution.inn);
-        selectedInstitution = null;
-        renderInstitutionsList();
-        alert('Университет успешно удалён');
-    } catch (error) {
-        console.error('Ошибка удаления:', error);
-        alert(`Ошибка удаления: ${error.message}`);
+    
+    if (confirm(`Удалить ВУЗ "${selectedInstitution.name}"?`)) {
+        try {
+            await apiService.deleteInstitution(selectedInstitution.id);
+            institutions = institutions.filter(m => m.id !== selectedInstitution.id);
+            selectedInstitution = null;
+            renderInstitutionsList();
+            actionPanel.classList.add('hidden'); // Скрываем панель действий
+            alert('ВУЗ успешно удален');
+        } catch (error) {
+            console.error('Ошибка удаления ВУЗа:', error);
+            alert(`Ошибка удаления: ${error.message}`);
+        }
     }
 }
 
