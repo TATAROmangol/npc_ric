@@ -12,29 +12,29 @@
     <main>
         <section>
             <h3>Список руководителей практик</h3>
-            <div class="list" id="supervisorsList">
+            <div class="list" id="mentorsList">
                 <!-- Список будет заполняться JavaScript -->
             </div>
 
             <div class="main-button-panel">
-                <button id="openSupervisorModalBtn">Добавить руководителя практики</button>
-                <button id="deleteSupervisorBtn">Удалить</button>
+                <button id="openMentorModalBtn">Добавить руководителя практики</button>
+                <button id="deleteMentorBtn">Удалить</button>
             </div>
         </section>
 
         <!-- Модальное окно -->
-        <div id="addSupervisorModal" class="modal">
+        <div id="addMentorModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2>Добавление руководителя</h2>
-                    <span class="closeSupervisorBtn">&times;</span>
+                    <span class="closeMentorBtn">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="supervisorName" placeholder="ФИО руководителя">
+                    <input type="text" id="mentorName" placeholder="ФИО руководителя" required minlength="3">
                 </div>
                 <div class="modal-footer">
-                    <button id="cancelSupervisorBtn">Отмена</button>
-                    <button id="submitSupervisorBtn">Сохранить</button>
+                    <button id="cancelMentorBtn">Отмена</button>
+                    <button id="submitMentorBtn">Сохранить</button>
                 </div>
             </div>
         </div>

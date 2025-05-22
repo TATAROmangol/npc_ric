@@ -35,9 +35,13 @@
                 </div>
                 <div class="modal-body">
                     <input type="text" id="institutionName" placeholder="Название университета">
-                    <input type="text" id="institutionINN" placeholder="ИНН">
-                    <input type="text" id="institutionAddress" placeholder="Адрес">
-                    <input type="text" id="institutionNumber" placeholder="Телефон">
+                    <input 
+                        type="text" 
+                        id="institutionINN" 
+                        pattern="\d*"          
+                        inputmode="numeric"    
+                        title="Введите только цифры"
+                    >
                 </div>
                 <div class="modal-footer">
                     <button id="cancelBtn">Отмена</button>
@@ -50,7 +54,7 @@
         <div id="formEditorModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Редактор формы студента для <span id="currentUniversityName"></span></h2>
+                    <h2>Редактор формы студента для <span id="currentInstitutionName"></span></h2>
                     <span class="close-form-btn">&times;</span>
                 </div>
                 <div class="modal-body">
