@@ -434,3 +434,75 @@ addFieldBtn.addEventListener('click', addFormField);
 saveFormBtn.addEventListener('click', saveFormFields);
 cancelFormBtn.addEventListener('click', closeFormEditorModal);
 closeFormBtn.addEventListener('click', closeFormEditorModal);
+
+document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
+    document.getElementById('templateUploadInput').click();
+});
+
+document.getElementById('templateUploadInput').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file || !file.name.endsWith('.docx')) {
+        alert('Пожалуйста, выберите файл формата .docx');
+        return;
+    }
+
+    const fileNameWithoutExtension = file.name.replace(/\.docx$/i, "");
+    const formData = new FormData();
+    formData.append('name', fileNameWithoutExtension);
+    formData.append('file', file);
+
+    fetch('http://localhost:8082/templates/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text || 'Ошибка при загрузке шаблона'); });
+        }
+        return response.json();
+    })
+    .then(result => {
+        alert('Шаблон успешно загружен');
+    })
+    .catch(error => {
+        alert('Ошибка: ' + error.message);
+    });
+});
+
+generateDocBtn.addEventListener('click', async () => {
+    if (!selectedInstitution) {
+        alert("Выберите ВУЗ перед генерацией документа.");
+        return;
+    }
+
+    const templateName = prompt("Введите имя шаблона (без .docx):");
+    if (!templateName) {
+        alert("Имя шаблона обязательно.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:8082/documents/generate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                template_name: templateName,
+                institution_id: selectedInstitution.id
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || "Ошибка генерации документа.");
+        }
+
+        const result = await response.json();
+        window.open(`http://localhost:8082${result.download_url}`, "_blank");
+    } catch (error) {
+        console.error("Ошибка генерации:", error);
+        alert("Ошибка генерации: " + error.message);
+    }
+});
+
