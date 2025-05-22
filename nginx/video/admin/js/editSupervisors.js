@@ -1,88 +1,112 @@
 class ApiService {
-    async fetchWithAuth(url, options = {}) {
+    constructor() {
+        this.adminBaseUrl = '/admin/api';
+        this.formsBaseUrl = '/forms/api';
+    }
+    
+    async fetchWithAuth(url, options = {}, expectJson = true) {
+        console.log('Отправка запроса:', { url, options });
         const token = localStorage.getItem('authToken');
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(token && { 'Authorization': `Bearer ${token}` }),
-            ...options.headers
-        };
-
-        const response = await fetch(url, {
-            ...options,
-            headers
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (token) {
+            options.headers = {
+                ...(options.headers || {}),
+                'Authorization': `Bearer ${token}`
+            };
         }
-
-        return response.json();
+        
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Ошибка ответа:', errorText);
+            throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
+        }
+        
+        // Если не ожидаем JSON, просто возвращаем response
+        return expectJson ? response.json() : response;
     }
 
+    // Mentor methods
     async getMentors() {
-        return this.fetchWithAuth('/admin/get/mentors');
+        return this.fetchWithAuth(`${this.adminBaseUrl}/get/mentors`);
     }
 
     async addMentor(name) {
-        return this.fetchWithAuth('/admin/post/mentor', {
+        if (!name || typeof name !== 'string') {
+            throw new Error('Имя руководителя обязательно и должно быть строкой');
+        }
+
+        return this.fetchWithAuth(`${this.adminBaseUrl}/post/mentor`, {
             method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name
+            })
+        });
+    }
+
+    async updateMentor(data) {
+        return this.fetchWithAuth(`${this.adminBaseUrl}/put/mentor`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name })
+            body: JSON.stringify(data)
         });
     }
 
     async deleteMentor(id) {
-        return this.fetchWithAuth('/admin/delete/mentor', {
+        if (!id) {
+            throw new Error('ID руководителя обязательно');
+        }
+
+        const response = await this.fetchWithAuth(`${this.adminBaseUrl}/delete/mentor`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ id })
-        });
+        }, false); // Добавляем флаг, что не ожидаем JSON в ответе
     }
-
-    async updateMentor(id, newName) {
-    return this.fetchWithAuth('/admin/put/mentor', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id, name: newName })
-    });
-}
 }
 
 const apiService = new ApiService();
 let mentors = [];
 let selectedMentor = null;
-
-// Получаем элементы DOM
-const supervisorsList = document.getElementById('supervisorsList');
-const openSupervisorModalBtn = document.getElementById('openSupervisorModalBtn');
-const addSupervisorModal = document.getElementById('addSupervisorModal');
-const supervisorNameInput = document.getElementById('supervisorName');
-const submitSupervisorBtn = document.getElementById('submitSupervisorBtn');
-const cancelSupervisorBtn = document.getElementById('cancelSupervisorBtn');
-const closeSupervisorBtn = document.querySelector('.closeSupervisorBtn');
-const deleteSupervisorBtn = document.getElementById('deleteSupervisorBtn');
+let mentorsList;
+let openMentorModalBtn, addMentorModal, mentorNameInput;
+let submitMentorBtn, cancelMentorBtn, closeMentorBtn, deleteMentorBtn;
 
 // Инициализация
 async function init() {
+    // Инициализация DOM-элементов
+    mentorsList = document.getElementById('mentorsList');
+    openMentorModalBtn = document.getElementById('openMentorModalBtn');
+    addMentorModal = document.getElementById('addMentorModal');
+    mentorNameInput = document.getElementById('mentorName');
+    submitMentorBtn = document.getElementById('submitMentorBtn');
+    cancelMentorBtn = document.getElementById('cancelMentorBtn');
+    closeMentorBtn = document.querySelector('.closeMentorBtn');
+    deleteMentorBtn = document.getElementById('deleteMentorBtn');
+    if (!mentorsList) {
+        console.error('Элемент mentorsList не найден в DOM');
+        return;
+    }
+    
     try {
         await loadMentors();
         
         // Обработчики событий
-        openSupervisorModalBtn.addEventListener('click', openAddSupervisorModal);
-        submitSupervisorBtn.addEventListener('click', addSupervisor);
-        cancelSupervisorBtn.addEventListener('click', closeAddSupervisorModal);
-        closeSupervisorBtn.addEventListener('click', closeAddSupervisorModal);
-        deleteSupervisorBtn.addEventListener('click', deleteSupervisor);
+        openMentorModalBtn.addEventListener('click', openAddMentorModal);
+        submitMentorBtn.addEventListener('click', addMentor);
+        cancelMentorBtn.addEventListener('click', closeAddMentorModal);
+        closeMentorBtn.addEventListener('click', closeAddMentorModal);
+        deleteMentorBtn.addEventListener('click', deleteMentor);
         
-        // Закрытие при клике вне окна
         window.addEventListener('click', (e) => {
-            if (e.target === addSupervisorModal) closeAddSupervisorModal();
+            if (e.target === addMentorModal) closeAddMentorModal();
         });
     } catch (error) {
         console.error('Ошибка инициализации:', error);
@@ -93,29 +117,43 @@ async function init() {
 // Загрузка руководителей с сервера
 async function loadMentors() {
     try {
-        mentors = await apiService.getMentors();
-        renderSupervisorsList();
+        const response = await apiService.getMentors();
+        mentors = Array.isArray(response) ? response : [];
+        renderMentorsList();
     } catch (error) {
         console.error('Ошибка загрузки руководителей:', error);
+        mentors = [];
+        renderMentorsList();
         throw error;
     }
 }
 
 // Рендер списка
-function renderSupervisorsList() {
-    supervisorsList.innerHTML = '';
+function renderMentorsList() {
+    if (!mentorsList) {
+        console.error('Элемент mentorsList не инициализирован');
+        return;
+    }
+    
+    mentorsList.innerHTML = '';
+    
+    if (!mentors || !Array.isArray(mentors)) {
+        mentorsList.innerHTML = '<div class="empty">Нет данных о руководителях</div>';
+        return;
+    }
+    
     mentors.forEach(mentor => {
         const item = document.createElement('div');
         item.className = 'list-item';
         item.textContent = mentor.name;
         item.dataset.id = mentor.id;
-        item.addEventListener('click', () => selectSupervisor(mentor));
-        supervisorsList.appendChild(item);
+        item.addEventListener('click', () => selectMentor(mentor));
+        mentorsList.appendChild(item);
     });
 }
 
 // Выбор руководителя
-function selectSupervisor(mentor) {
+function selectMentor(mentor) {
     document.querySelectorAll('.list-item').forEach(item => {
         item.classList.remove('selected');
     });
@@ -130,18 +168,19 @@ function selectSupervisor(mentor) {
 }
 
 // Работа с модальным окном
-function openAddSupervisorModal() {
-    console.log('Функция openAddSupervisorModal вызвана'); // Добавьте это
-    supervisorNameInput.value = '';
-    addSupervisorModal.style.display = 'block';
+function openAddMentorModal() {
+    console.log('Функция openAddMentorModal вызвана'); // Добавьте это
+    mentorNameInput.value = '';
+    addMentorModal.style.display = 'block';
 }
 
-function closeAddSupervisorModal() {
-    addSupervisorModal.style.display = 'none';
+function closeAddMentorModal() {
+    addMentorModal.style.display = 'none';
 }
 
-async function addSupervisor() {
-    const name = supervisorNameInput.value.trim();
+async function addMentor() {
+    const name = mentorNameInput.value.trim();
+    
     if (!name) {
         alert('Введите ФИО руководителя');
         return;
@@ -150,17 +189,17 @@ async function addSupervisor() {
     try {
         const newMentor = await apiService.addMentor(name);
         mentors.push(newMentor);
-        renderSupervisorsList();
-        closeAddSupervisorModal();
+        renderMentorsList();
+        closeAddMentorModal();
         alert('Руководитель успешно добавлен!');
     } catch (error) {
         console.error('Ошибка добавления руководителя:', error);
-        alert('Не удалось добавить руководителя');
+        alert(`Ошибка: ${error.message}`);
     }
 }
 
 // Удаление руководителя
-async function deleteSupervisor() {
+async function deleteMentor() {
     if (!selectedMentor) {
         alert('Выберите руководителя для удаления');
         return;
@@ -171,11 +210,11 @@ async function deleteSupervisor() {
             await apiService.deleteMentor(selectedMentor.id);
             mentors = mentors.filter(m => m.id !== selectedMentor.id);
             selectedMentor = null;
-            renderSupervisorsList();
+            renderMentorsList();
             alert('Руководитель успешно удален');
         } catch (error) {
             console.error('Ошибка удаления руководителя:', error);
-            alert('Не удалось удалить руководителя');
+            alert(`Ошибка удаления: ${error.message}`);
         }
     }
 }

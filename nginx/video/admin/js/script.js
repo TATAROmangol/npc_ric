@@ -1,6 +1,7 @@
 class ApiService {
-    constructor(baseUrl = '/admin/api') {
-        this.baseUrl = baseUrl;
+    constructor() {
+        this.adminBaseUrl = '/admin/api';
+        this.formsBaseUrl = '/forms/api';
     }
 
     async fetchWithAuth(url, options = {}) {
@@ -11,18 +12,19 @@ class ApiService {
                 'Authorization': `Bearer ${token}`
             };
         }
-        // Убедитесь, что URL формируется без дублирования слешей
-        const fullUrl = `${this.baseUrl}/${url}`.replace(/([^:]\/)\/+/g, '$1');
-        const response = await fetch(fullUrl, options);
+
+        const response = await fetch(url, options);
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.json(); // Пытаемся прочитать JSON-ошибку
+            console.error('Детали ошибки:', errorData);
+            throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
         }
         return response.json();
-}
+    }
 
     // Institution methods
     async getInstitutions() {
-        return this.fetchWithAuth('get/institutions');
+        return this.fetchWithAuth(`${this.adminBaseUrl}/get/institutions`);
     }
 
     async getInstitutionByINN(inn) {
@@ -30,17 +32,31 @@ class ApiService {
     }
 
     async addInstitution(data) {
-        return this.fetchWithAuth('/admin/post/institution', {
+        // Гарантируем правильный формат данных
+        const requestData = {
+            name: String(data.Name).trim(),
+            inn: Number(data.INN),
+            columns: Array.isArray(data.Columns) ? data.Columns : [String]
+        };
+
+        // Валидация
+        if (!requestData.name) throw new Error('Название обязательно');
+        if (isNaN(requestData.inn)) throw new Error('ИНН должен быть числом');
+
+        console.log('Отправляемые данные:', requestData); // Для отладки
+
+        return this.fetchWithAuth(`${this.adminBaseUrl}/post/institution`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(requestData)
         });
     }
 
     async updateInstitution(data) {
-        return this.fetchWithAuth('/admin/put/institution', {
+        return this.fetchWithAuth(`${this.adminBaseUrl}/institution`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -50,22 +66,31 @@ class ApiService {
     }
 
     async deleteInstitution(inn) {
-        return this.fetchWithAuth('/admin/delete/institution', {
+        // Преобразуем ИНН в число
+        const innNumber = Number(inn);
+        if (isNaN(innNumber)) {
+            throw new Error('ИНН должен быть числом');
+        }
+
+        return this.fetchWithAuth(`${this.adminBaseUrl}/delete/institution`, {
             method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
-            body: JSON.stringify({ inn })
+            body: JSON.stringify({
+                inn: innNumber  // Отправляем ИНН как число
+            })
         });
     }
 
     // Form methods
-    async getFormColumns() {
-        return this.fetchWithAuth('/forms/get/form/columns');
+    async getFormColumns(institutionId) {
+        return this.fetchWithAuth(`${this.formsBaseUrl}/get/form/columns?institutionId=${institutionId}`);
     }
 
     async updateFormColumns(institutionId, columns) {
-        return this.fetchWithAuth('/admin/put/institution/columns', {
+        return this.fetchWithAuth('put/form/columns', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -76,11 +101,11 @@ class ApiService {
 
     // Mentor methods
     async getMentors() {
-        return this.fetchWithAuth('/admin/get/mentors');
+        return this.fetchWithAuth(`${this.adminBaseUrl}/get/mentors`);
     }
 
     async addMentor(data) {
-        return this.fetchWithAuth('/admin/post/mentor', {
+        return this.fetchWithAuth(`${this.adminBaseUrl}/post/mentor`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -90,7 +115,7 @@ class ApiService {
     }
 
     async updateMentor(data) {
-        return this.fetchWithAuth('/admin/put/mentor', {
+        return this.fetchWithAuth(`${this.adminBaseUrl}/put/mentor`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -100,7 +125,7 @@ class ApiService {
     }
 
     async deleteMentor(id) {
-        return this.fetchWithAuth('/admin/delete/mentor', {
+        return this.fetchWithAuth(`${this.adminBaseUrl}/delete/mentor`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -112,8 +137,10 @@ class ApiService {
 
 const apiService = new ApiService("/admin/api/"); 
 
-let institutions = [];
+let institutions = []
 let selectedInstitution = null;
+
+
 
 
 
@@ -179,10 +206,17 @@ async function loadInstitutions() {
 // Функции для работы со списком вузов
 function renderInstitutionsList() {
     institutionsList.innerHTML = '';
+    
+    if (!institutions || institutions.length === 0) {
+        institutionsList.innerHTML = '<div class="empty">Нет данных об университетах</div>';
+        return;
+    }
+    
     institutions.forEach(institution => {
         const item = document.createElement('div');
         item.className = 'list-item';
         item.textContent = institution.name;
+        item.dataset.id = institution.id;
         item.addEventListener('click', () => selectInstitution(institution));
         institutionsList.appendChild(item);
     });
@@ -209,8 +243,6 @@ function selectInstitution(institution) {
 function openAddInstitutionModal() {
     institutionNameInput.value = '';
     institutionINNInput.value = '';
-    institutionAddressInput.value = '';
-    institutionNumberInput.value = '';
     addInstitutionModal.style.display = 'block';
 }
 
@@ -221,30 +253,24 @@ function closeAddInstitutionModal() {
 async function addInstitution() {
     const name = institutionNameInput.value.trim();
     const inn = institutionINNInput.value.trim();
-    const address = institutionAddressInput.value.trim();
-    const phone = institutionNumberInput.value.trim();
-    
+
     if (!name || !inn) {
-        alert('Название и ИНН университета обязательны для заполнения');
+        alert('Заполните все обязательные поля');
         return;
     }
-    
+
     try {
-        const newInstitution = await apiService.addInstitution({
-            name,
-            inn,
-            address,
-            phone,
-            formFields: [] // Начальный пустой список полей формы
+        await apiService.addInstitution({
+            Name: name,
+            INN: inn,
+            Columns: [String] // Явно указываем пустой массив columns
         });
-        
-        institutions.push(newInstitution);
-        renderInstitutionsList();
-        closeAddInstitutionModal();
         alert('Университет успешно добавлен!');
+        closeAddInstitutionModal();
+        await loadInstitutions(); // Обновляем список
     } catch (error) {
-        console.error('Ошибка при добавлении университета:', error);
-        alert('Произошла ошибка при добавлении университета');
+        console.error('Ошибка:', error);
+        alert(`Ошибка: ${error.message}`);
     }
 }
 
@@ -269,37 +295,41 @@ function closeFormEditorModal() {
 async function renderFormFields(institution) {
     formFieldsContainer.innerHTML = '';
     
-    // Загружаем поля формы для выбранного учреждения
-    const formColumns = await apiService.getFormColumns(institution.id);
-    const fields = formColumns || [];
-    
-    fields.forEach((field, index) => {
-        const fieldElement = document.createElement('div');
-        fieldElement.className = 'form-field';
-        fieldElement.innerHTML = `
-            <div class="form-group">
-                <label>Название поля:</label>
-                <input type="text" value="${field.label}" class="field-label">
-            </div>
-            <div class="form-group">
-                <label>Тип поля:</label>
-                <select class="field-type">
-                    <option value="text" ${field.type === 'text' ? 'selected' : ''}>Текст</option>
-                    <option value="date" ${field.type === 'date' ? 'selected' : ''}>Дата</option>
-                    <option value="number" ${field.type === 'number' ? 'selected' : ''}>Число</option>
-                    <option value="email" ${field.type === 'email' ? 'selected' : ''}>Email</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>
-                    Обязательное поле
-                    <input type="checkbox" class="field-required" ${field.required ? 'checked' : ''}>
-                </label>
-            </div>
-            <button class="remove-field-btn">Удалить</button>
-        `;
-        formFieldsContainer.appendChild(fieldElement);
-    });
+    try {
+        const formColumns = await apiService.getFormColumns(institution.id);
+        const fields = formColumns || [];
+        
+        fields.forEach((field, index) => {
+            const fieldElement = document.createElement('div');
+            fieldElement.className = 'form-field';
+            fieldElement.innerHTML = `
+                <div class="form-group">
+                    <label>Название поля:</label>
+                    <input type="text" value="${field.label || ''}" class="field-label">
+                </div>
+                <div class="form-group">
+                    <label>Тип поля:</label>
+                    <select class="field-type">
+                        <option value="text" ${field.type === 'text' ? 'selected' : ''}>Текст</option>
+                        <option value="date" ${field.type === 'date' ? 'selected' : ''}>Дата</option>
+                        <option value="number" ${field.type === 'number' ? 'selected' : ''}>Число</option>
+                        <option value="email" ${field.type === 'email' ? 'selected' : ''}>Email</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" class="field-required" ${field.required ? 'checked' : ''}>
+                        Обязательное поле
+                    </label>
+                </div>
+                <button class="remove-field-btn">Удалить</button>
+            `;
+            formFieldsContainer.appendChild(fieldElement);
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке полей формы:', error);
+        alert('Не удалось загрузить поля формы');
+    }
 }
 
 function addFormField() {
@@ -362,20 +392,26 @@ formFieldsContainer.addEventListener('click', (e) => {
 
 // Функция удаления вуза
 async function deleteInstitution() {
-    if (!selectedInstitution) return;
-    
-    if (confirm(`Удалить университет "${selectedInstitution.name}"?`)) {
-        try {
-            await apiService.deleteInstitution(selectedInstitution.inn);
-            institutions = institutions.filter(inst => inst.inn !== selectedInstitution.inn);
-            selectedInstitution = null;
-            actionPanel.classList.add('hidden');
-            renderInstitutionsList();
-            alert('Университет успешно удален');
-        } catch (error) {
-            console.error('Ошибка при удалении университета:', error);
-            alert('Произошла ошибка при удалении университета');
-        }
+    if (!selectedInstitution) {
+        alert('Выберите университет для удаления');
+        return;
+    }
+
+    if (!confirm(`Удалить университет "${selectedInstitution.name}"?`)) {
+        return;
+    }
+
+    try {
+        await apiService.deleteInstitution(selectedInstitution.inn);
+        
+        // Обновляем список
+        institutions = institutions.filter(inst => inst.inn !== selectedInstitution.inn);
+        selectedInstitution = null;
+        renderInstitutionsList();
+        alert('Университет успешно удалён');
+    } catch (error) {
+        console.error('Ошибка удаления:', error);
+        alert(`Ошибка удаления: ${error.message}`);
     }
 }
 
