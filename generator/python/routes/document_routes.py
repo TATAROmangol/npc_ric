@@ -3,6 +3,10 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import io
 from services import document_service
+from db.database import SessionLocal
+from db.models import GeneratedDocument
+
+
 
 router = APIRouter()
 
@@ -22,14 +26,21 @@ def generate(request: GenerateRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+
 @router.get("/download/{doc_id}")
 def download(doc_id: int):
-    doc = document_service.get_document_by_id(doc_id)
-    if not doc:
-        raise HTTPException(status_code=404, detail="Generated file not found")
+    db = SessionLocal()
+    try:
+        doc = db.query(GeneratedDocument).filter_by(id=doc_id).first()
+        if not doc:
+            raise HTTPException(status_code=404, detail="Generated file not found")
 
-    return StreamingResponse(
-        io.BytesIO(doc["content"]),
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        headers={"Content-Disposition": f"attachment; filename={doc['filename']}"}
-    )
+        return StreamingResponse(
+            io.BytesIO(doc.file_content),
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={
+                "Content-Disposition": f"attachment; filename={doc.filename}"
+            }
+        )
+    finally:
+        db.close()
