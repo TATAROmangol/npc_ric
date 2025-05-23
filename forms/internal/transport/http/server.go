@@ -72,13 +72,13 @@ func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *HTTP
 	admin.Handle("/get/institutions", h.GetInstitutions()).Methods(http.MethodGet)
 	admin.Handle("/get/institution", h.GetInstitutionFromINN()).Methods(http.MethodGet)
 	admin.Handle("/get/mentors", h.GetMentors()).Methods(http.MethodGet)
-	admin.Handle("/get/form/columns", h.GetFormColumns()).Methods(http.MethodGet)
+	admin.Handle("/get/form/columns", h.GetFormColumns()).Methods(http.MethodGet, http.MethodPost)
 
 	forms := mux.PathPrefix("/forms").Subrouter()
 	forms.Handle("/get/institutions", h.GetInstitutions()).Methods(http.MethodGet)
 	forms.Handle("/get/mentors", h.GetMentors()).Methods(http.MethodGet)
 	forms.Handle("/get/institution", h.GetInstitutionFromINN()).Methods(http.MethodGet)
-	forms.Handle("/get/form/columns", h.GetFormColumns()).Methods(http.MethodGet)
+	forms.Handle("/get/form/columns", h.GetFormColumns()).Methods(http.MethodGet, http.MethodPost)
 	forms.Handle("/post/form", h.PostForm()).Methods(http.MethodPost)
 	
 	server := &http.Server{
