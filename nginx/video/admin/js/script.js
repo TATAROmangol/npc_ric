@@ -253,6 +253,8 @@ function selectInstitution(institution) {
     
     selectedInstitution = institution;
     actionPanel.classList.remove('hidden');
+
+    fetchTemplate();
 }
 
 // Функции для модального окна добавления вуза
@@ -436,6 +438,10 @@ cancelFormBtn.addEventListener('click', closeFormEditorModal);
 closeFormBtn.addEventListener('click', closeFormEditorModal);
 
 document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
+    if (!selectedInstitution) {
+        alert("Сначала выберите университет.");
+        return;
+    }
     document.getElementById('templateUploadInput').click();
 });
 
@@ -446,9 +452,13 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
         return;
     }
 
-    const fileNameWithoutExtension = file.name.replace(/\.docx$/i, "");
+    if (!selectedInstitution) {
+        alert("Сначала выберите университет.");
+        return;
+    }
+
     const formData = new FormData();
-    formData.append('name', fileNameWithoutExtension);
+    formData.append('institution_id', selectedInstitution.id);
     formData.append('file', file);
 
     fetch('http://localhost:8082/templates/upload', {
@@ -462,7 +472,7 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
         return response.json();
     })
     .then(result => {
-        alert('Шаблон успешно загружен');
+        alert('Шаблон успешно загружен для "' + selectedInstitution.name + '"');
     })
     .catch(error => {
         alert('Ошибка: ' + error.message);
@@ -475,12 +485,6 @@ generateDocBtn.addEventListener('click', async () => {
         return;
     }
 
-    const templateName = prompt("Введите имя шаблона (без .docx):");
-    if (!templateName) {
-        alert("Имя шаблона обязательно.");
-        return;
-    }
-
     try {
         const response = await fetch("http://localhost:8082/documents/generate", {
             method: "POST",
@@ -488,7 +492,6 @@ generateDocBtn.addEventListener('click', async () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                template_name: templateName,
                 institution_id: selectedInstitution.id
             })
         });
@@ -505,4 +508,3 @@ generateDocBtn.addEventListener('click', async () => {
         alert("Ошибка генерации: " + error.message);
     }
 });
-
