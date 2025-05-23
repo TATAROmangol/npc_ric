@@ -102,18 +102,36 @@ class ApiService {
 
     // Form methods
     async getFormColumns(institutionId) {
-        return this.fetchWithAuth(`${this.formsBaseUrl}/get/form/columns?institutionId=${institutionId}`);
+        const id = Number(institutionId);
+        if (isNaN(id)) throw new Error('ID учреждения должен быть числом');
+
+        return this.fetchWithAuth(`${this.adminBaseUrl}/get/form/columns`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ institution_id: id }) // ← ключ должен быть именно institution_id
+        });
     }
 
+
+
     async updateFormColumns(institutionId, columns) {
-        return this.fetchWithAuth('put/form/columns', {
+        const id = Number(institutionId);
+        if (isNaN(id)) throw new Error('ID учреждения должен быть числом');
+
+        return this.fetchWithAuth(`${this.adminBaseUrl}/put/institution/columns`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ institutionId, columns })
+            body: JSON.stringify({ 
+                id: id,          // ← ключ, который ожидает сервер
+                columns: columns 
+            })
         });
     }
+
 
     // Mentor methods
     async getMentors() {
@@ -311,32 +329,66 @@ function closeFormEditorModal() {
 }
 
 async function renderFormFields(institution) {
-    formFieldsContainer.innerHTML = '';
-    
+    formFieldsContainer.innerHTML = '<div class="loader">Загрузка полей формы...</div>';
+
     try {
-        const formColumns = await apiService.getFormColumns(institution.id);
-        const fields = formColumns || [];
-        
-        fields.forEach((field, index) => {
+        const response = await apiService.getFormColumns(institution.id);
+        console.log("Сервер вернул поля формы:", response);
+
+        // Обрабатываем возможные форматы
+        const rawFields = Array.isArray(response)
+        ? response
+        : (response?.columns || response?.data?.columns || []);
+
+        if (rawFields.length === 0) {
+            formFieldsContainer.innerHTML = `
+                <div class="empty-form">
+                    <p>Нет настроенных полей</p>
+                </div>
+            `;
+            return;
+        }
+
+        formFieldsContainer.innerHTML = '';
+
+        rawFields.forEach((field, index) => {
+            let fieldData = {};
+
+            // Если поле — это строка (старая структура: []string)
+            if (typeof field === 'string') {
+                fieldData = {
+                    label: field,
+                    type: 'text',
+                    required: false
+                };
+            } else {
+                // Новая структура с объектами
+                fieldData = {
+                    label: field.label || '',
+                    type: field.type || 'text',
+                    required: field.required || false
+                };
+            }
+
             const fieldElement = document.createElement('div');
             fieldElement.className = 'form-field';
             fieldElement.innerHTML = `
                 <div class="form-group">
                     <label>Название поля:</label>
-                    <input type="text" value="${field.label || ''}" class="field-label">
+                    <input type="text" value="${fieldData.label}" class="field-label">
                 </div>
                 <div class="form-group">
                     <label>Тип поля:</label>
                     <select class="field-type">
-                        <option value="text" ${field.type === 'text' ? 'selected' : ''}>Текст</option>
-                        <option value="date" ${field.type === 'date' ? 'selected' : ''}>Дата</option>
-                        <option value="number" ${field.type === 'number' ? 'selected' : ''}>Число</option>
-                        <option value="email" ${field.type === 'email' ? 'selected' : ''}>Email</option>
+                        <option value="text" ${fieldData.type === 'text' ? 'selected' : ''}>Текст</option>
+                        <option value="date" ${fieldData.type === 'date' ? 'selected' : ''}>Дата</option>
+                        <option value="number" ${fieldData.type === 'number' ? 'selected' : ''}>Число</option>
+                        <option value="email" ${fieldData.type === 'email' ? 'selected' : ''}>Email</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label>
-                        <input type="checkbox" class="field-required" ${field.required ? 'checked' : ''}>
+                        <input type="checkbox" class="field-required" ${fieldData.required ? 'checked' : ''}>
                         Обязательное поле
                     </label>
                 </div>
@@ -346,9 +398,15 @@ async function renderFormFields(institution) {
         });
     } catch (error) {
         console.error('Ошибка при загрузке полей формы:', error);
-        alert('Не удалось загрузить поля формы');
+        formFieldsContainer.innerHTML = `
+            <div class="error">
+                Ошибка загрузки: ${error.message}
+                <button onclick="renderFormFields(selectedInstitution)">Повторить</button>
+            </div>
+        `;
     }
 }
+
 
 function addFormField() {
     const fieldElement = document.createElement('div');
@@ -380,26 +438,45 @@ function addFormField() {
 
 async function saveFormFields() {
     if (!selectedInstitution) return;
-    
+
     const fields = [];
+    let hasEmptyField = false;
+
     document.querySelectorAll('.form-field').forEach(fieldEl => {
-        fields.push({
-            label: fieldEl.querySelector('.field-label').value,
-            type: fieldEl.querySelector('.field-type').value,
-            required: fieldEl.querySelector('.field-required').checked,
-            name: fieldEl.querySelector('.field-label').value.toLowerCase().replace(/\s+/g, '_')
-        });
+        const label = fieldEl.querySelector('.field-label').value.trim();
+
+        // Помечаем, если хотя бы одно поле пустое
+        if (!label) {
+            hasEmptyField = true;
+        } else {
+            fields.push(label);
+        }
     });
-    
+
+    if (hasEmptyField) {
+        alert('Пожалуйста, заполните все поля или удалите пустые перед сохранением.');
+        return;
+    }
+
+    if (fields.length === 0) {
+        alert('Невозможно сохранить: форма пуста.');
+        return;
+    }
+
+    console.log("Отправляемые поля:", fields);
+
     try {
         await apiService.updateFormColumns(selectedInstitution.id, fields);
         closeFormEditorModal();
-        alert('Форма сохранена!');
+        alert('Форма успешно сохранена!');
     } catch (error) {
         console.error('Ошибка при сохранении формы:', error);
         alert('Произошла ошибка при сохранении формы');
     }
 }
+
+
+
 
 // Обработчик удаления поля формы
 formFieldsContainer.addEventListener('click', (e) => {
