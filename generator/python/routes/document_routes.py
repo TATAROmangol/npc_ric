@@ -2,29 +2,43 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 import io
-from services import document_service
+import uuid
 from db.database import SessionLocal
-from db.models import GeneratedDocument
-
-
+from db.models import GeneratedDocument, Template
+from services.docx_service import generate_docx_from_template
 
 router = APIRouter()
 
 
 class GenerateRequest(BaseModel):
-    template_name: str
     institution_id: int
 
 
 @router.post("/generate")
 def generate(request: GenerateRequest):
+    db = SessionLocal()
     try:
-        doc = document_service.generate_document(request.template_name,
-                                                 request.institution_id)
-        return {"download_url": f"/documents/download/{doc['id']}"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        template = db.query(Template).filter_by(
+                    institution_id=request.institution_id).first()
+        if not template:
+            raise HTTPException(status_code=404, detail="Template not found")
 
+        generated_bytes = generate_docx_from_template(
+                                template.content,
+                                request.institution_id)
+
+        doc_id = str(uuid.uuid4())
+        db_doc = GeneratedDocument(
+            template_id=template.id,
+            file_content=generated_bytes,
+            filename=f"{doc_id}.docx"
+        )
+        db.add(db_doc)
+        db.commit()
+
+        return {"download_url": f"/documents/download/{db_doc.id}"}
+    finally:
+        db.close()
 
 
 @router.get("/download/{doc_id}")
@@ -33,7 +47,8 @@ def download(doc_id: int):
     try:
         doc = db.query(GeneratedDocument).filter_by(id=doc_id).first()
         if not doc:
-            raise HTTPException(status_code=404, detail="Generated file not found")
+            raise HTTPException(status_code=404,
+                                detail="Generated file not found")
 
         return StreamingResponse(
             io.BytesIO(doc.file_content),
