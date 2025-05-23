@@ -1,11 +1,5 @@
 let universitiesData = {};
 
-let supervisorData = {
-    "supervisor1": "Иванов Иван Иванович",
-    "supervisor2": "Петров Петр Петрович",
-    "supervisor3": "Максимов Максим Максимович"
-};
-
 // DOM элементы
 const universitySelect = document.getElementById('university-select');
 const supervisorSelect = document.getElementById('supervisor-select');
@@ -56,7 +50,7 @@ function populateUniversitySelect() {
 }
 
 // Заполнение списка руководителей
-function populateSupervisorSelect() {
+async function populateSupervisorSelect() {
     supervisorSelect.innerHTML = '';
 
     const defaultOption = document.createElement('option');
@@ -66,13 +60,26 @@ function populateSupervisorSelect() {
     defaultOption.disabled = true;
     supervisorSelect.appendChild(defaultOption);
 
-    Object.values(supervisorData).forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        supervisorSelect.appendChild(option);
-    });
+    try {
+        const response = await fetch('/forms/api/get/mentors');
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки руководителей');
+        }
+
+        const mentors = await response.json();
+
+        mentors.forEach(mentor => {
+            const option = document.createElement('option');
+            option.value = mentor.name;
+            option.textContent = mentor.name;
+            supervisorSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке руководителей:', error);
+        alert('Не удалось загрузить список руководителей');
+    }
 }
+
 
 // Обработка смены университета
 universitySelect.addEventListener('change', async function () {
