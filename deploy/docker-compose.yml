@@ -67,7 +67,7 @@ services:
       postgres:
         condition: service_healthy
     build: 
-      context: ../generator/python
+      context: ../generator
       dockerfile: Dockerfile
     environment:
       FORMS_GRPC_HOST: forms
