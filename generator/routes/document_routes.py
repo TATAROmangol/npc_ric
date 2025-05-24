@@ -52,7 +52,9 @@ def download(doc_id: int):
 
         return StreamingResponse(
             io.BytesIO(doc.file_content),
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            media_type=(
+                "application/vnd.openxmlformats-"
+                "officedocument.wordprocessingml.document"),
             headers={
                 "Content-Disposition": f"attachment; filename={doc.filename}"
             }

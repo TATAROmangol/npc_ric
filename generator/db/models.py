@@ -9,7 +9,7 @@ class Template(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     content = Column(LargeBinary)
-    institution_id = Column(Integer, unique=True)  
+    institution_id = Column(Integer, unique=True)
 
 
 class GeneratedDocument(Base):
