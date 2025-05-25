@@ -15,7 +15,10 @@ def generate_docx_from_template(template_bytes: bytes,
     #     }
     subdoc = doc.new_subdoc()
     table = subdoc.add_table(rows=1, cols=len(table_data["columns"]))
-    table.style = 'Table Grid'
+    try:
+        table.style = 'Table Grid'
+    except Exception:
+        pass
 
     hdr_cells = table.rows[0].cells
     for i, col_name in enumerate(table_data["columns"]):
