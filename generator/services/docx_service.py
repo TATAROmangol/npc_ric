@@ -26,8 +26,11 @@ def generate_docx_from_template(template_bytes: bytes,
 
     for row in table_data["rows"]:
         row_cells = table.add_row().cells
-        for i, val in enumerate(row):
-            row_cells[i].text = val
+        for i in range(min(len(row), len(row_cells))):
+            row_cells[i].text = row[i]
+
+    for i in range(len(row), len(row_cells)):
+        row_cells[i].text = ""
 
     context = {
         "table": subdoc
