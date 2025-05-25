@@ -4,6 +4,9 @@ from db.models import Template, GeneratedDocument
 from services.docx_service import generate_docx_from_template
 from fastapi import HTTPException
 from typing import Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def generate_document(template_name: str, institution_id: int) -> dict:
@@ -30,6 +33,7 @@ def generate_document(template_name: str, institution_id: int) -> dict:
 
         return {"id": new_doc.id, "filename": new_doc.filename}
     except Exception:
+        logger.exception("Error while generating document")
         db.rollback()
         raise
     finally:
