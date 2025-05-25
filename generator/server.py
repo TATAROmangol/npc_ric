@@ -4,6 +4,9 @@ from routes.document_routes import router as document_router
 from db.database import init_db
 from fastapi.middleware.cors import CORSMiddleware
 
+from logger import setup_logger
+setup_logger()
+
 
 app = FastAPI()
 
@@ -14,6 +17,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.on_event("startup")
 def on_startup():

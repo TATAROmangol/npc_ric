@@ -1,6 +1,9 @@
-from docxtpl import DocxTemplate, Subdoc
+from docxtpl import DocxTemplate
 import io
 from grpc_clients.table_client import get_table_data
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def generate_docx_from_template(template_bytes: bytes,
@@ -9,6 +12,14 @@ def generate_docx_from_template(template_bytes: bytes,
     doc = DocxTemplate(template_stream)
 
     table_data = get_table_data(institution_id)
+
+    logger.info(f"Generating docx for institution {institution_id}")
+    logger.debug(f"Table columns: {table_data['columns']}")
+    if table_data["rows"]:
+        logger.debug(f"First row: {table_data['rows'][0]}")
+    else:
+        logger.warning("No rows received from gRPC")
+
     # table_data = {
     #     "columns": ["Column 1", "Column 2"],
     #     "rows": [["value 1", "value 2"], ["value 3", "value 4"]]
@@ -18,6 +29,7 @@ def generate_docx_from_template(template_bytes: bytes,
     try:
         table.style = 'Table Grid'
     except Exception:
+        logger.exception("No table style")
         pass
 
     hdr_cells = table.rows[0].cells
@@ -26,8 +38,11 @@ def generate_docx_from_template(template_bytes: bytes,
 
     for row in table_data["rows"]:
         row_cells = table.add_row().cells
-        for i, val in enumerate(row):
-            row_cells[i].text = val
+        for i in range(min(len(row), len(row_cells))):
+            row_cells[i].text = row[i]
+
+    for i in range(len(row), len(row_cells)):
+        row_cells[i].text = ""
 
     context = {
         "table": subdoc

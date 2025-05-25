@@ -6,6 +6,9 @@ import uuid
 from db.database import SessionLocal
 from db.models import GeneratedDocument, Template
 from services.docx_service import generate_docx_from_template
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 

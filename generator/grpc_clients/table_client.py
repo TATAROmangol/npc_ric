@@ -1,9 +1,13 @@
 import grpc
 from generated import table_pb2, table_pb2_grpc
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_table_data(institution_id: int):
+    logger.info(f"Requesting table data for institution {institution_id}")
     host = os.getenv("FORMS_GRPC_HOST", "forms")
     port = os.getenv("FORMS_GRPC_PORT", "50050")
     with grpc.insecure_channel(f"{host}:{port}") as channel:
