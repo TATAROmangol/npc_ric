@@ -12,5 +12,5 @@ INSERT INTO forms (info, institution_id) VALUES
 (ARRAY['A', 'B', 'C'], 1), 
 (ARRAY['D', 'E', 'F'], 1), 
 (ARRAY['G', 'H', 'I'], 1), 
-(ARRAY['A', 'B', 'C'], 1),
-(ARRAY['A', 'B', 'C'], 2);
+(ARRAY['Z', 'X', 'V'], 1),
+(ARRAY['AA', 'BB', 'CC'], 2);

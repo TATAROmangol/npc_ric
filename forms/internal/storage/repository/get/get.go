@@ -129,7 +129,7 @@ func (g *Get) GetFormRows(ctx context.Context, institution_id int) ([][]string, 
 	stmt, err := g.db.Prepare(`
 	SELECT info
 	FROM forms
-	WHERE id = $1
+	WHERE institution_id = $1
 	`)
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, errors.ErrCreateStatement, err)
@@ -152,6 +152,7 @@ func (g *Get) GetFormRows(ctx context.Context, institution_id int) ([][]string, 
 			return nil, err
 		}
 
+		logger.GetFromCtx(ctx).InfoContext(ctx, "row in storage", row)
 		res = append(res, row)
 	}
 
