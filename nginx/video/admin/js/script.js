@@ -1,3 +1,22 @@
+async function checkAuth() {
+    try {
+        const response = await fetch('/admin/api/get/institutions', {
+            method: 'GET',
+            credentials: 'include' 
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                window.location.href = '/auth/';
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+        window.location.href = '/auth/';
+    }
+}
+
 class ApiService {
     constructor() {
         this.adminBaseUrl = '/admin/api';
@@ -207,6 +226,7 @@ const closeFormBtn = document.querySelector('.close-form-btn');
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth();
     try {
         await loadInstitutions();
         
@@ -257,12 +277,10 @@ function renderInstitutionsList() {
 }
 
 function selectInstitution(institution) {
-    // Снимаем выделение со всех элементов
     document.querySelectorAll('.list-item').forEach(item => {
         item.classList.remove('selected');
     });
     
-    // Выделяем выбранный
     const items = Array.from(document.querySelectorAll('.list-item'));
     const selectedItem = items.find(item => item.textContent === institution.name);
     if (selectedItem) {
@@ -299,11 +317,11 @@ async function addInstitution() {
         await apiService.addInstitution({
             Name: name,
             INN: inn,
-            Columns: [String] // Явно указываем пустой массив columns
+            Columns: [String] 
         });
         alert('Университет успешно добавлен!');
         closeAddInstitutionModal();
-        await loadInstitutions(); // Обновляем список
+        await loadInstitutions(); 
     } catch (error) {
         console.error('Ошибка:', error);
         alert(`Ошибка: ${error.message}`);
@@ -335,7 +353,6 @@ async function renderFormFields(institution) {
         const response = await apiService.getFormColumns(institution.id);
         console.log("Сервер вернул поля формы:", response);
 
-        // Обрабатываем возможные форматы
         const rawFields = Array.isArray(response)
         ? response
         : (response?.columns || response?.data?.columns || []);
@@ -354,7 +371,6 @@ async function renderFormFields(institution) {
         rawFields.forEach((field, index) => {
             let fieldData = {};
 
-            // Если поле — это строка (старая структура: []string)
             if (typeof field === 'string') {
                 fieldData = {
                     label: field,
@@ -362,7 +378,6 @@ async function renderFormFields(institution) {
                     required: false
                 };
             } else {
-                // Новая структура с объектами
                 fieldData = {
                     label: field.label || '',
                     type: field.type || 'text',
@@ -445,7 +460,6 @@ async function saveFormFields() {
     document.querySelectorAll('.form-field').forEach(fieldEl => {
         const label = fieldEl.querySelector('.field-label').value.trim();
 
-        // Помечаем, если хотя бы одно поле пустое
         if (!label) {
             hasEmptyField = true;
         } else {
@@ -475,8 +489,17 @@ async function saveFormFields() {
     }
 }
 
-
-
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+        await fetch('/auth/api/logout', { 
+            method: 'POST',
+            credentials: 'include' 
+        });
+        window.location.href = '/auth/';
+    } catch (error) {
+        console.error('Ошибка выхода:', error);
+    }
+});
 
 // Обработчик удаления поля формы
 formFieldsContainer.addEventListener('click', (e) => {
