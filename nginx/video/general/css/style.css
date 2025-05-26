@@ -64,7 +64,6 @@ header {
 
 h1 {
     margin: 0;
-    width: 100%; 
     text-align: center; 
     font-size: 48px;
     padding: 10px 0;
@@ -422,3 +421,18 @@ button {
     background: #555;
 }
 
+.auth-container {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.general-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around; /* центрирование по горизонтали */
+    align-items: center; 
+}
+
+.general-button {
+    width: 25vh;
+}
