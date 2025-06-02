@@ -5,6 +5,7 @@ import (
 	"forms/internal/storage/repository/get"
 	"forms/internal/storage/repository/testcontainer"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 )
 
@@ -17,7 +18,7 @@ func TestPut_PutInstitutionInfo(t *testing.T) {
 
 	repo := NewPut(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type args struct {
@@ -66,7 +67,7 @@ func TestPut_PutInstitutionColumns(t *testing.T) {
 
 	repo := NewPut(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -113,7 +114,7 @@ func TestPut_PutMentor(t *testing.T) {
 
 	repo := NewPut(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	t.Run("first", func(t *testing.T) {

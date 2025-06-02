@@ -10,6 +10,7 @@ import (
 	"forms/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 
@@ -59,7 +60,7 @@ func TestGetHandler_GetInstitutions(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			req := httptest.NewRequest("GET", "/user/get", nil)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -130,7 +131,7 @@ func TestGetHandler_GetMentors(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			req := httptest.NewRequest("GET", "/user/get", nil)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -212,7 +213,7 @@ func TestGetHandler_GetInstitutionFromINN(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("GET", "/user/get", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -295,7 +296,7 @@ func TestGetHandler_GetFormColumns(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("GET", "/user/get", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 

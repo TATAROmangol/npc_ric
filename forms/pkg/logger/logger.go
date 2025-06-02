@@ -2,17 +2,17 @@ package logger
 
 import (
 	"context"
+	"io"
 	"log/slog"
-	"os"
 )
 
 type Logger struct {
 	log *slog.Logger
 }
 
-func New() *Logger {
+func New(writer io.Writer) *Logger {
 	log := slog.New(
-		&ContextHandler{slog.NewJSONHandler(os.Stdout, nil)},
+		&ContextHandler{slog.NewJSONHandler(writer, nil)},
 	)
 	return &Logger{log}
 }

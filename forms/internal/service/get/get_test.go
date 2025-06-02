@@ -6,6 +6,7 @@ import (
 	"forms/internal/entities"
 	"forms/internal/service/get/mocks"
 	"forms/pkg/logger"
+	"os"
 	"reflect"
 	"testing"
 
@@ -16,7 +17,7 @@ func TestGetService_GetInstitutions(t *testing.T) {
 	repo := mocks.NewMockGetRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func()
@@ -73,7 +74,7 @@ func TestGetService_GetMentors(t *testing.T) {
 	repo := mocks.NewMockGetRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func()
@@ -130,7 +131,7 @@ func TestGetService_GetInstitutionFromINN(t *testing.T) {
 	repo := mocks.NewMockGetRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(inn int)
@@ -194,7 +195,7 @@ func TestGetService_GetFormColumns(t *testing.T) {
 	repo := mocks.NewMockGetRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int)
@@ -248,7 +249,7 @@ func TestGetService_GetFormRows(t *testing.T) {
 	repo := mocks.NewMockGetRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int)

@@ -5,6 +5,7 @@ import (
 	"forms/internal/storage/repository/get"
 	"forms/internal/storage/repository/testcontainer"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 )
 
@@ -17,7 +18,7 @@ func TestDelete_DeleteInstitution(t *testing.T) {
 
 	repo := NewDelete(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -63,7 +64,7 @@ func TestDelete_DeleteMentor(t *testing.T) {
 
 	repo := NewDelete(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -101,7 +102,7 @@ func TestDelete_DeleteForms(t *testing.T) {
 
 	repo := NewDelete(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {

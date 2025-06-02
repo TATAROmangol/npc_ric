@@ -5,6 +5,7 @@ import (
 	"errors"
 	"forms/internal/service/delete/mocks"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -14,7 +15,7 @@ func TestDeleteService_DeleteInstitution(t *testing.T) {
 	repo := mocks.NewMockDeleteRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(institutionId int)
@@ -59,7 +60,7 @@ func TestDeleteService_DeleteMentor(t *testing.T) {
 	repo := mocks.NewMockDeleteRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(mentorId int)

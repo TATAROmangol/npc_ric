@@ -10,8 +10,10 @@ import (
 	httpserver "forms/internal/transport/http"
 	"forms/internal/transport/http/handlers"
 	"forms/internal/transport/http/middlewares"
+	"forms/pkg/kafka"
 	"forms/pkg/logger"
 	"forms/pkg/postgres"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,8 +27,11 @@ const (
 func main(){
 	cfg := config.MustLoad()
 
+	kafkaWriter := kafka.New(cfg.Kafka)
+	writer := io.MultiWriter(os.Stdout, kafkaWriter)
+
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(writer)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	logger.AppendCtx(ctx, "service", "forms")

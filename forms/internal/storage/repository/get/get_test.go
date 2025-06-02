@@ -5,6 +5,7 @@ import (
 	"forms/internal/entities"
 	"forms/internal/storage/repository/testcontainer"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 )
 
@@ -17,7 +18,7 @@ func TestGet_GetInstitutions(t *testing.T) {
 
 	repo := NewGet(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -64,7 +65,7 @@ func TestGet_GetMentors(t *testing.T) {
 
 	repo := NewGet(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -107,7 +108,7 @@ func TestGet_GetInstitutionFromINN(t *testing.T) {
 
 	repo := NewGet(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -150,7 +151,7 @@ func TestGet_GetFormColumns(t *testing.T) {
 
 	repo := NewGet(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -192,7 +193,7 @@ func TestGet_GetFormRows(t *testing.T) {
 
 	repo := NewGet(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {

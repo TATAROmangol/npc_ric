@@ -5,3 +5,7 @@ type Config struct{
 	Port string `env:"KAFKA_PORT"`
 	LogTopic string `env:"KAFKA_LOG_TOPIC"`
 }
+
+func (c *Config) Addr() string {
+	return c.Host + ":" + c.Port
+}

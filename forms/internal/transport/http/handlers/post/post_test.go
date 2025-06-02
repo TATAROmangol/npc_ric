@@ -9,6 +9,7 @@ import (
 	"forms/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"testing"
 
@@ -108,7 +109,7 @@ func TestPostHandler_PostInstitution(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -197,7 +198,7 @@ func TestPostHandler_PostMentor(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -319,7 +320,7 @@ func TestPostHandler_PostForm(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 

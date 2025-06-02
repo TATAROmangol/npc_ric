@@ -9,6 +9,7 @@ import (
 	"forms/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -61,7 +62,7 @@ func TestPutHandler_PutInstitutionInfo(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -119,7 +120,7 @@ func TestPutHandler_PutInstitutionColumns(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -178,7 +179,7 @@ func TestPutHandler_PutMentor(t *testing.T) {
 			body, _ := json.Marshal(tt.req)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("POST", "/user/post", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
