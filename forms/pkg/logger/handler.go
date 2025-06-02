@@ -15,7 +15,6 @@ type ContextHandler struct {
 
 func (h ContextHandler) Handle(ctx context.Context, r slog.Record) error {
     initFields(ctx, r)
-
 	return h.Handler.Handle(ctx, r)
 }
 
