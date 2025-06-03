@@ -1,5 +1,6 @@
 import logging
 import sys
+from kafka_logger import KafkaLoggingHandler
 
 
 def setup_logger():
@@ -16,10 +17,15 @@ def setup_logger():
 
     file_handler = logging.FileHandler("app.log", mode='a', encoding='utf-8')
     file_handler.setFormatter(formatter)
+
+    kafka_handler = KafkaLoggingHandler()
+    kafka_handler.setFormatter(formatter)
+
     if logger.hasHandlers():
         logger.handlers.clear()
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
+    logger.addHandler(kafka_handler)
 
     return logger
