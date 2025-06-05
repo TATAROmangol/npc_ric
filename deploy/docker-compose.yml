@@ -128,8 +128,6 @@ services:
   kafka:
     image: bitnami/kafka:3.6
     container_name: kafka
-    ports:
-      - "9092:9092"
     environment:
       - KAFKA_CFG_NODE_ID=0
       - KAFKA_CFG_PROCESS_ROLES=controller,broker
@@ -140,7 +138,8 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
       - KAFKA_KRAFT_CLUSTER_ID=cy5WKwDUY0qMJ2qccq8jbg==
-
+    expose:
+      - ${KAFKA_PORT}
     volumes:
       - ./kafka_data:/bitnami/kafka
 
