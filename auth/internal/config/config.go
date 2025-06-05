@@ -5,6 +5,7 @@ import (
 	grpcserver "auth/internal/transport/grpc"
 	httpserver "auth/internal/transport/http"
 	"auth/pkg/jwt"
+	"auth/pkg/kafka"
 	"log"
 
 	"github.com/caarlos0/env/v11"
@@ -16,6 +17,7 @@ type Config struct {
 	GRPC grpcserver.Config
 	Admin admin.Config
 	JWT jwt.Config
+	Kafka kafka.Config
 }
 
 func MustLoad() *Config {
