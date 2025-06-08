@@ -14,14 +14,10 @@ type ContextHandler struct {
 }
 
 func (h ContextHandler) Handle(ctx context.Context, r slog.Record) error {
-    initFields(ctx, r)
-	return h.Handler.Handle(ctx, r)
-}
-
-func initFields(ctx context.Context, r slog.Record) {
     if attrs, ok := ctx.Value(LogFields).([]slog.Attr); ok {
 		for _, v := range attrs {
 			r.AddAttrs(v)
 		}
 	}
+	return h.Handler.Handle(ctx, r)
 }
