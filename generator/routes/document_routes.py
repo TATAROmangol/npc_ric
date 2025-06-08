@@ -59,7 +59,7 @@ def download(doc_id: int):
                 "application/vnd.openxmlformats-"
                 "officedocument.wordprocessingml.document"),
             headers={
-                "Content-Disposition": f"attachment; filename={doc.filename}"
+                "Content-Disposition": "attachment; filename=generated.docx"
             }
         )
     finally:

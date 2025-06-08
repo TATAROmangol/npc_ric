@@ -386,11 +386,9 @@ async function renderFormFields(institution) {
                         <option value="email" ${fieldData.type === 'email' ? 'selected' : ''}>Email</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>
-                        <input type="checkbox" class="field-required" ${fieldData.required ? 'checked' : ''}>
-                        Обязательное поле
-                    </label>
+                <div class="form-group checkbox-group">
+                    <label for="required">Обязательное поле:</label>
+                    <input id="required" type="checkbox" class="field-required" ${fieldData.required ? 'checked' : ''}>
                 </div>
                 <button class="remove-field-btn">Удалить</button>
             `;

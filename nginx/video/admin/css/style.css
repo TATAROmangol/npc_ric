@@ -366,9 +366,10 @@ button:hover {
 }
 
 .form-group label {
-    display: block;
+    display: inline-block;
     margin-bottom: 5px;
     font-weight: bold;
+    font-size: 24px;
 }
 
 .form-group input, .form-group select {
@@ -376,6 +377,17 @@ button:hover {
     padding: 8px;
     box-sizing: border-box;
 }
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.checkbox-group label {
+    margin: 15;
+}
+
 
 /* Редактор формы */
 .form-field {
