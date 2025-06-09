@@ -10,8 +10,10 @@ import (
 	httpserver "forms/internal/transport/http"
 	"forms/internal/transport/http/handlers"
 	"forms/internal/transport/http/middlewares"
+	"forms/pkg/kafka"
 	"forms/pkg/logger"
 	"forms/pkg/postgres"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,9 +27,15 @@ const (
 func main(){
 	cfg := config.MustLoad()
 
+	kafkaWriter := kafka.New(cfg.Kafka)
+	defer kafkaWriter.Close()
+	writer := io.MultiWriter(os.Stdout, kafkaWriter)
+
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(writer)
 	ctx = logger.InitFromCtx(ctx, l)
+
+	logger.AppendCtx(ctx, "service", "forms")
 
 	db, err := postgres.NewDB(cfg.PG)
 	if err != nil {
@@ -103,6 +111,12 @@ func main(){
 		os.Exit(1)
 	}
 	l.InfoContext(ctx, "verify client closed")
+
+	if err := kafkaWriter.Close(); err != nil {
+		l.ErrorContext(ctx, "failed to close kafka writer", err)
+		os.Exit(1)
+	}
+	l.InfoContext(ctx, "kafka writer closed")
 
 	if err := db.Close(); err != nil {
 		l.ErrorContext(ctx, "failed to close db", err)

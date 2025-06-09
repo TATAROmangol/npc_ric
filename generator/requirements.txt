@@ -8,3 +8,4 @@ grpcio-tools==1.60.0
 python-docx==1.1.2
 docxtpl==0.16.0
 alembic==1.13.1
+confluent_kafka==2.3.0

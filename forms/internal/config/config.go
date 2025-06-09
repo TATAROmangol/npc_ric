@@ -4,6 +4,7 @@ import (
 	tablegrpc "forms/internal/transport/grpc/table"
 	"forms/internal/transport/grpc/verify"
 	httpserver "forms/internal/transport/http"
+	"forms/pkg/kafka"
 	"forms/pkg/postgres"
 	"log"
 
@@ -16,6 +17,7 @@ type Config struct {
 	HTTP httpserver.Config
 	Verify verify.Config
 	GRPC tablegrpc.Config
+	Kafka kafka.Config
 }
 
 func MustLoad() *Config {

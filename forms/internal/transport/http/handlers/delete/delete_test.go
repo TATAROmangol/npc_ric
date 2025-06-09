@@ -9,6 +9,7 @@ import (
 	"forms/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -65,7 +66,7 @@ func TestDeleteHandler_DeleteInstitution(t *testing.T) {
 			body, _ := json.Marshal(tt.request)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("DELETE", "/user/delete", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -128,7 +129,7 @@ func TestDeleteHandler_DeleteMentor(t *testing.T) {
 			body, _ := json.Marshal(tt.request)
 			bytesBody := bytes.NewBuffer(body)
 			req := httptest.NewRequest("DELETE", "/user/delete", bytesBody)
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 

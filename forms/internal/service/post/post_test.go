@@ -5,6 +5,7 @@ import (
 	"errors"
 	"forms/internal/service/post/mocks"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -14,7 +15,7 @@ func TestPostService_PostInstitution(t *testing.T) {
 	repo := mocks.NewMockPostRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int)
@@ -85,7 +86,7 @@ func TestPostService_PostMentor(t *testing.T) {
 	repo := mocks.NewMockPostRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(name string)
@@ -142,7 +143,7 @@ func TestPostService_PostForm(t *testing.T) {
 	repo := mocks.NewMockPostRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(info []string, institutionId int)

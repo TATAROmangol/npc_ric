@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"forms/internal/storage/repository/testcontainer"
@@ -17,7 +18,7 @@ func TestPost_PostInstitution(t *testing.T) {
 
 	repo := NewPost(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -76,7 +77,7 @@ func TestPost_PostMentor(t *testing.T) {
 
 	repo := NewPost(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	tests := []struct {
@@ -116,7 +117,7 @@ func TestPost_PostForm(t *testing.T) {
 
 	repo := NewPost(db)
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	// Сначала создаем institution для теста формы

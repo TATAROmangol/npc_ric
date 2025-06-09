@@ -6,6 +6,7 @@ import (
 	"forms/pkg/logger"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -26,7 +27,7 @@ func TestMiddlewares_InitLoggerContextMiddleware(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", nil)
 	rr := httptest.NewRecorder()
 
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx := logger.InitFromCtx(context.Background(), l)
 
 	middleware := m.InitLoggerContextMiddleware(ctx)
@@ -61,7 +62,7 @@ func TestMiddlewares_AuthMiddleware(t *testing.T) {
 	m := NewMiddlewares(verifier)
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(val string)

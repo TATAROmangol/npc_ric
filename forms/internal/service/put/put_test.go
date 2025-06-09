@@ -5,6 +5,7 @@ import (
 	"errors"
 	"forms/internal/service/put/mocks"
 	"forms/pkg/logger"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -14,7 +15,7 @@ func TestPutService_PutInstitutionInfo(t *testing.T) {
 	repo := mocks.NewMockPutRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int, name string, inn int)
@@ -73,7 +74,7 @@ func TestPutService_PutInstitutionColumns(t *testing.T) {
 	repo := mocks.NewMockPutRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int, columns []string)
@@ -142,7 +143,7 @@ func TestPutService_PutMentor(t *testing.T) {
 	repo := mocks.NewMockPutRepo(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(id int, info string)
