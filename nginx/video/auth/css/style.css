@@ -82,3 +82,79 @@ button {
     margin-top: 20px;
     font-size: 24px;
 }
+.form-group {
+    margin-bottom: 50px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+/* Редактор формы */
+.form-field {
+    background-color: #f5f5f5;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.remove-field-btn {
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Модальное окно редактирования формы */
+#formEditorModal .modal-content {
+    max-height: 80vh; 
+    display: flex;
+    flex-direction: column;
+}
+
+#formEditorModal .modal-body {
+    overflow-y: auto; 
+    flex-grow: 1; 
+    padding-right: 10px; 
+    margin-right: -10px;
+}
+
+#formFieldsContainer {
+    max-height: calc(60vh - 100px); 
+    overflow-y: auto; 
+    padding-right: 5px;
+}
+
+
+#formFieldsContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#formFieldsContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#formFieldsContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#formFieldsContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.auth-container {
+    margin-left: auto;
+    margin-right: auto;
+}
