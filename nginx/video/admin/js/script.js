@@ -7,14 +7,14 @@ async function checkAuth() {
 
         if (!response.ok) {
             if (response.status === 401) {
-                setTimeout(() => window.location.href = '/auth/', 1000);
+                setTimeout(() => window.location.href = '/auth/', 2000);
             }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
     } catch (error) {
-        alert('Введен неправильный логин или пароль');
+        showCustomAlert("Введен неправильный логин или пароль");
         console.error('Ошибка проверки авторизации:', error);
-        window.location.href = '/auth/';
+        setTimeout(() => window.location.href = '/auth/', 6000);
     }
 }
 
@@ -240,7 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
-        alert('Произошла ошибка при загрузке данных');
     }
 });
 
@@ -588,3 +587,14 @@ generateDocBtn.addEventListener('click', async () => {
         alert("Ошибка генерации: " + error.message);
     }
 });
+
+function showCustomAlert(message) {
+    document.getElementById('customAlertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    document.getElementById('customAlertOverlay').style.display = 'block';
+}
+
+function hideCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    document.getElementById('customAlertOverlay').style.display = 'none';
+}
