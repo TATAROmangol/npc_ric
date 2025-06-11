@@ -35,7 +35,7 @@ func main(){
 	l := logger.New(writer)
 	ctx = logger.InitFromCtx(ctx, l)
 
-	logger.AppendCtx(ctx, "service", "forms")
+	ctx = logger.AppendCtx(ctx, "service", "forms")
 
 	db, err := postgres.NewDB(cfg.PG)
 	if err != nil {

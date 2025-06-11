@@ -5,6 +5,7 @@ import (
 	"auth/pkg/logger"
 	"context"
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -15,7 +16,7 @@ func TestService_Login(t *testing.T) {
 	jwt := mocks.NewMockJWT(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type args struct {
@@ -119,7 +120,7 @@ func TestService_IsAdmin(t *testing.T) {
 	jwt := mocks.NewMockJWT(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(token string)

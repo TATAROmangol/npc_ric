@@ -1,23 +1,15 @@
 package config
 
 import (
-	"auth/internal/admin"
-	grpcserver "auth/internal/transport/grpc"
-	httpserver "auth/internal/transport/http"
-	"auth/pkg/jwt"
-	"auth/pkg/kafka"
 	"log"
+	"stats/kafka"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	HTTP httpserver.Config
-	GRPC grpcserver.Config
-	Admin admin.Config
-	JWT jwt.Config
-	Kafka kafka.Config
+	Kafka kafka.Config 
 }
 
 func MustLoad() *Config {

@@ -7,8 +7,10 @@ import (
 	grpcserver "auth/internal/transport/grpc"
 	httpserver "auth/internal/transport/http"
 	"auth/pkg/jwt"
+	"auth/pkg/kafka"
 	"auth/pkg/logger"
 	"context"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -17,9 +19,15 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
+	kafkaWriter := kafka.New(cfg.Kafka)
+	defer kafkaWriter.Close()
+	writer := io.MultiWriter(os.Stdout, kafkaWriter)
+
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(writer)
 	ctx = logger.InitFromCtx(ctx, l)
+
+	ctx = logger.AppendCtx(ctx, "service", "auth")
 
 	jwt := jwt.New(cfg.JWT)
 	admin := admin.New(cfg.Admin)

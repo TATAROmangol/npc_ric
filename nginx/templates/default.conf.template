@@ -1,0 +1,52 @@
+server {
+    listen       ${NGINX_HTTP_PORT};
+    server_name  localhost;
+
+    location /admin/api/ {
+        proxy_pass http://forms:${FORMS_HTTP_PORT}/admin/;
+    }
+    location /auth/api/ {
+        proxy_pass http://auth:${AUTH_HTTP_PORT}/;
+    }
+    location /forms/api/ {
+        proxy_pass http://forms:${FORMS_HTTP_PORT}/forms/;
+    }
+    location /generator/api/ {
+        proxy_pass http://generator:${GEN_HTTP_PORT}/;
+    }
+
+    location /general/ {
+        root   /etc/nginx/video;
+    }
+    location /admin/ {
+        root   /etc/nginx/video;
+    }
+    location /auth/ {
+        root   /etc/nginx/video;
+    }
+    location /forms/ {
+        root   /etc/nginx/video;
+    }
+}
+
+server {
+    listen ${NGINX_GRPC_AUTH_PORT};
+    http2 on;
+
+    location / {
+        grpc_pass grpc://auth:${AUTH_GRPC_PORT};
+        grpc_set_header Host $host;
+        grpc_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen ${NGINX_GRPC_FORMS_PORT};
+    http2 on;
+
+    location / {
+        grpc_pass grpc://forms:${FORMS_TABLE_GRPC_PORT};
+        grpc_set_header Host $host;
+        grpc_set_header X-Real-IP $remote_addr;
+    }
+}
