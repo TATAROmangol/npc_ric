@@ -27,7 +27,7 @@ func main() {
 	l := logger.New(writer)
 	ctx = logger.InitFromCtx(ctx, l)
 
-	logger.AppendCtx(ctx, "service", "auth")
+	ctx = logger.AppendCtx(ctx, "service", "auth")
 
 	jwt := jwt.New(cfg.JWT)
 	admin := admin.New(cfg.Admin)
