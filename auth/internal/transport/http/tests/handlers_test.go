@@ -1,8 +1,8 @@
 package httpserver
 
 import (
-	"auth/internal/transport/http/tests/mocks"
 	hs "auth/internal/transport/http"
+	"auth/internal/transport/http/tests/mocks"
 	"auth/pkg/logger"
 	"bytes"
 	"context"
@@ -10,6 +10,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -19,7 +20,7 @@ func TestLoginHandler(t *testing.T) {
 	loginer := mocks.NewMockLoginer(gomock.NewController(t))
 
 	ctx := context.Background()
-	l := logger.New()
+	l := logger.New(os.Stdout)
 	ctx = logger.InitFromCtx(ctx, l)
 
 	type MockBehavior func(login, password string)
@@ -86,7 +87,7 @@ func TestLoginHandler(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(json))
 			req.Header.Set("Content-Type", "application/json")
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
@@ -140,7 +141,7 @@ func TestLogoutHandler(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/login", nil)
 
-			l := logger.New()
+			l := logger.New(os.Stdout)
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 			if tt.cookie != nil {
