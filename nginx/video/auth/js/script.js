@@ -20,34 +20,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 credentials: 'include' 
             });
 
-            if (response.ok) {
-                successMessage.textContent = 'Вход выполнен успешно! Перенаправление...';
-                successMessage.style.display = 'block';
-                setTimeout(() => window.location.href = '/admin/', 1500);
-            } else {
-                errorMessage.textContent = 'Неверный логин или пароль';
-                errorMessage.style.display = 'block';
-            }
+            if (response.status === 200) {
+                setTimeout(() => window.location.href = '/admin/', 1000);
+            } 
+            
         } catch (error) {
             errorMessage.textContent = 'Ошибка сети';
             errorMessage.style.display = 'block';
         }
     });
-
-    async function checkAuthStatus() {
-        try {
-            const response = await fetch('/auth/api/login', {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                window.location.href = '/admin/';
-            }
-        } catch (error) {
-            console.error('Ошибка проверки авторизации:', error);
-        }
-    }
-
-    checkAuthStatus();
 });

@@ -9,15 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
 </head>
 <body>
-    <header>
-       <h1>Подача заявления</h1>
+    <header class= "admin-header">
+       <h1 class="center">Подача заявления</h1>
     </header>
     <main class="student-form">
         <div class="form-container">
             <div class="form-group">
-                <label for="university-select">Университет:</label>
+                <label for="university-select">Учебное заведение:</label>
                 <select id="university-select" class="form-control">
-                    <option value="">Выберите ВУЗ</option>
+                    <option value="">Выберите учебное заведение</option>
                 </select>
             </div>
             
@@ -32,7 +32,7 @@
                 <div id="form-fields-container"></div>
                 
                 <div class="buttons">
-                    <button onclick="window.location.href='home_page.html'">Назад</button>
+                    <button onclick="window.location.href='/general/'">Назад</button>
                     <button type="submit" id="submit-btn" class="hidden">Отправить</button>
                 </div>
             </form>
