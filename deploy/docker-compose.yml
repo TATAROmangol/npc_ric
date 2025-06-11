@@ -158,7 +158,6 @@ services:
     tty: true
     stdin_open: true
 
-<<<<<<< Updated upstream
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
     hostname: zookeeper
@@ -200,13 +199,6 @@ services:
       KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:${ZOOKEEPER_PORT}
     depends_on:
       - kafka
-=======
-  kafka:
-    image: apache/kafka:latest
-    container_name: kafka
-    environment:
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
->>>>>>> Stashed changes
 
 volumes:
   pgdata:
