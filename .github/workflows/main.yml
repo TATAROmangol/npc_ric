@@ -10,28 +10,22 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (без очистки)
         uses: actions/checkout@v4
         with:
           repository: TATAROmangol/npc_ric
-          clean: false  # Ключевое изменение - отключаем очистку
+          clean: false  # Отключаем автоматическую очистку
 
-      - name: Stop and cleanup containers
-        working-directory: ./deploy
+      - name: Prepare workspace
         run: |
-          docker-compose down || true
-          # Дополнительная очистка, если нужно
-          docker system prune -f
+          # Очищаем всё, кроме postgres_data
+          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
+          find . -mindepth 1 -not -path './deploy/postgres_data*' -delete 2>/dev/null || true
 
       - name: Deploy services
         working-directory: ./deploy
         run: |
+          docker-compose down || true
           docker-compose up -d --build
           sleep 30
           docker-compose ps -a
-          docker-compose logs --tail=20
-
-      - name: Verify services
-        working-directory: ./deploy
-        run: |
-          curl -I http://localhost/forms/ || echo "Nginx not responding"
