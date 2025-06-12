@@ -21,11 +21,17 @@ jobs:
       #   with:
       #     driver: docker-container
 
-      - name: Install Docker Compose
+      # - name: Install Docker Compose
+      #   run: |
+      #     sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+      #     sudo chmod +x /usr/local/bin/docker-compose
+      #     docker-compose --version
+
+      - name: Fix permissions for postgres_data
         run: |
-          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-          sudo chmod +x /usr/local/bin/docker-compose
-          docker-compose --version
+          sudo chown -R $USER:$USER /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy/postgres_data
+          sudo chmod -R 755 /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy/postgres_data
+
 
       - name: Deploy services
         working-directory: ./deploy
