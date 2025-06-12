@@ -26,7 +26,7 @@ async function loadUniversities() {
         populateUniversitySelect();
     } catch (error) {
         console.error('Ошибка при загрузке учебных заведений:', error);
-        alert('Не удалось загрузить список учебных заведений');
+        showCustomAlert('Не удалось загрузить список учебных заведений');
     }
 }
 
@@ -76,7 +76,7 @@ async function populateSupervisorSelect() {
         });
     } catch (error) {
         console.error('Ошибка при загрузке руководителей:', error);
-        alert('Не удалось загрузить список руководителей');
+        showCustomAlert('Не удалось загрузить список руководителей');
     }
 }
 
@@ -114,7 +114,7 @@ universitySelect.addEventListener('change', async function () {
                 universitiesData[selectedUniversity].fields = parsedFields;
             } catch (error) {
                 console.error('Ошибка при загрузке полей формы:', error);
-                alert('Не удалось загрузить поля формы');
+                showCustomAlert('Не удалось загрузить поля формы');
                 return;
             }
         }
@@ -134,7 +134,7 @@ function createFormFields(fieldsConfig) {
 
         const label = document.createElement('label');
         label.htmlFor = field.name;
-        label.textContent = field.label + (field.required ? '*' : '');
+        label.textContent = field.label;
 
         let input;
         
@@ -142,7 +142,7 @@ function createFormFields(fieldsConfig) {
             input = document.createElement('select');
             input.id = field.name;
             input.name = field.name;
-            input.required = !!field.required;
+            input.required = true; 
             input.className = 'form-control';
             
             if (field.options) {
@@ -158,7 +158,7 @@ function createFormFields(fieldsConfig) {
             input.id = field.name;
             input.name = field.name;
             input.type = field.type || 'text';
-            input.required = !!field.required;
+            input.required = true; // Всегда required
             input.className = 'form-control';
         }
 
@@ -232,6 +232,25 @@ function checkRequiredFields(fieldsConfig) {
 function validateForm(fieldsConfig) {
     let isValid = true;
     
+    // Проверка выбора руководителя
+    if (!supervisorSelect.value) {
+        supervisorSelect.classList.add('error');
+        const errorElement = supervisorSelect.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains('error-message')) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message';
+            errorMsg.textContent = 'Выберите руководителя';
+            supervisorSelect.parentNode.insertBefore(errorMsg, supervisorSelect.nextSibling);
+        }
+        isValid = false;
+    } else {
+        supervisorSelect.classList.remove('error');
+        const errorElement = supervisorSelect.nextElementSibling;
+        if (errorElement && errorElement.classList.contains('error-message')) {
+            errorElement.remove();
+        }
+    }
+    
     fieldsConfig.forEach(field => {
         const input = document.getElementById(field.name);
         const value = input.value.trim();
@@ -271,28 +290,15 @@ dynamicForm.addEventListener('submit', async function (e) {
     e.preventDefault(); 
 
     const selectedUniversity = universitySelect.value;
-    if (!selectedUniversity) {
-        alert('Пожалуйста, выберите учебное заведение');
-        return;
-    }
 
     const university = universitiesData[selectedUniversity];
-    
-    // 1. Проверяем заполнение обязательных полей
-    const areRequiredFieldsFilled = checkRequiredFields(university.fields);
-    if (!areRequiredFieldsFilled) {
-        alert('Пожалуйста, заполните все обязательные поля');
-        return;
-    }
-    
-    // 2. Проверяем валидность данных в полях
+
     const isFormValid = validateForm(university.fields);
     if (!isFormValid) {
-        alert('Пожалуйста, исправьте ошибки в форме перед отправкой');
+        showCustomAlert('Пожалуйста, исправьте ошибки в форме перед отправкой');
         return;
     }
 
-    // Если все проверки пройдены, собираем данные
     const infoArray = university.fields.map(field => {
         return document.getElementById(field.name).value;
     });
@@ -320,7 +326,7 @@ dynamicForm.addEventListener('submit', async function (e) {
             throw new Error(await response.text() || 'Ошибка отправки формы');
         }
 
-        alert('Заявление успешно отправлено!');
+        showCustomAlert('Заявление успешно отправлено!');
         dynamicForm.reset();
         formFieldsContainer.innerHTML = '';
         submitBtn.classList.add('hidden');
@@ -328,9 +334,20 @@ dynamicForm.addEventListener('submit', async function (e) {
         
     } catch (error) {
         console.error('Ошибка:', error);
-        alert('Ошибка при отправке формы: ' + error.message);
+        showCustomAlert('Ошибка при отправке формы: ' + error.message);
     }
 });
+
+function showCustomAlert(message) {
+    document.getElementById('customAlertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    document.getElementById('customAlertOverlay').style.display = 'block';
+}
+
+function hideCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    document.getElementById('customAlertOverlay').style.display = 'none';
+}
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {

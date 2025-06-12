@@ -74,10 +74,10 @@
         </div>
 
         <!-- Модальное окно alert -->
-        <div id="customAlert" style="display: none; width: 400px; height: 180 px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #FED101; padding: 20px; border-radius: 8px; border: 3px solid red; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;">
+        <div id="customAlert" style="display: none; width: 400px; height: 180 px; position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); background: #FED101; opacity: 0.95; padding: 20px; border-radius: 8px; border: 3px solid black; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;">
             <p id="customAlertMessage" style="text-align: center; font-size: 24px">Сообщение</p>
         </div>
-        <div id="customAlertOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+        <div id="customAlertOverlay" onclick="hideCustomAlert()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
     </main>
     <script src="js/script.js"></script>
 </body>
