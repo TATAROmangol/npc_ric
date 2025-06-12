@@ -540,7 +540,7 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
     formData.append('institution_id', selectedInstitution.id);
     formData.append('file', file);
 
-    fetch('https://localhost/templates/upload', {
+    fetch('http://localhost:8082/templates/upload', {
         method: 'POST',
         body: formData
     })
@@ -565,7 +565,7 @@ generateDocBtn.addEventListener('click', async () => {
     }
 
     try {
-        const response = await fetch("https://localhost/documents/generate", {
+        const response = await fetch("http://localhost:8082/documents/generate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -581,7 +581,7 @@ generateDocBtn.addEventListener('click', async () => {
         }
 
         const result = await response.json();
-        window.open(`https://localhost${result.download_url}`, "_blank");
+        window.open(`http://localhost:8082${result.download_url}`, "_blank");
     } catch (error) {
         console.error("Ошибка генерации:", error);
         showCustomAlert("Ошибка генерации: " + error.message);
