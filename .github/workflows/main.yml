@@ -27,11 +27,9 @@ jobs:
       #     sudo chmod +x /usr/local/bin/docker-compose
       #     docker-compose --version
 
-      - name: Fix permissions for postgres_data
+      - name: Clean excluding postgres_data
         run: |
-          sudo chown -R $USER:$USER /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy/postgres_data
-          sudo chmod -R 755 /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy/postgres_data
-
+          find . -mindepth 1 -not -path './deploy/postgres_data*' -delete
 
       - name: Deploy services
         working-directory: ./deploy
