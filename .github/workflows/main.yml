@@ -10,12 +10,14 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Cleanup previous workspace
+      - name: Prepare workspace
         run: |
-          # Safely remove everything except postgres_data
-          if [ -d "/home/github-runner/actions-runner/_work/npc_ric/npc_ric" ]; then
-            find /home/github-runner/actions-runner/_work/npc_ric/npc_ric -mindepth 1 \
-              -not -path '*/deploy/postgres_data*' -delete || true
+          # Аккуратно очищаем workspace, сохраняя postgres_data
+          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
+          if [ -d "$WORKSPACE" ]; then
+            find "$WORKSPACE" -mindepth 1 \
+              -not -path "$WORKSPACE/deploy/postgres_data*" \
+              -exec rm -rf {} + 2>/dev/null || true
           fi
           
       - name: Checkout code
