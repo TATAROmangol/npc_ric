@@ -10,15 +10,6 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          repository: TATAROmangol/npc_ric
-          clean: true
-          sparse-checkout: |
-            /*
-            !/deploy/postgres_data
-
       # - name: Fix Docker permissions
       #   run: sudo chmod 666 /var/run/docker.sock
 
