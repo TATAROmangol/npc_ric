@@ -10,9 +10,6 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Fix workspace permissions
-        run: sudo chown -R github-runner:github-runner /home/github-runner/actions-runner/_work
-
       - name: Checkout code
         uses: actions/checkout@v4
 
