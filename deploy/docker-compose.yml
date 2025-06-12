@@ -26,11 +26,8 @@ services:
         - ${NGINX_GRPC_AUTH_PORT}
         - ${NGINX_GRPC_FORMS_PORT} 
       volumes:
-        - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         - ../nginx/templates:/etc/nginx/templates:ro
         - ../nginx/video:/etc/nginx/video
-        - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-        - ../nginx/conf.d:/etc/nginx/conf.d:ro
         - ../nginx/certs:/etc/nginx/certs:ro
       ports:
         - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
