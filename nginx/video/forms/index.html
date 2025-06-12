@@ -9,15 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script> 
 </head>
 <body>
-    <header>
-       <h1>Подача заявления</h1>
+    <header class= "admin-header">
+       <h1 class="center">Подача заявления</h1>
     </header>
     <main class="student-form">
         <div class="form-container">
             <div class="form-group">
-                <label for="university-select">Университет:</label>
+                <label for="university-select">Учебное заведение:</label>
                 <select id="university-select" class="form-control">
-                    <option value="">Выберите ВУЗ</option>
+                    <option value="">Выберите учебное заведение</option>
                 </select>
             </div>
             
@@ -32,12 +32,18 @@
                 <div id="form-fields-container"></div>
                 
                 <div class="buttons">
-                    <button onclick="window.location.href='home_page.html'">Назад</button>
+                    <button onclick="window.location.href='/general/'">Назад</button>
                     <button type="submit" id="submit-btn" class="hidden">Отправить</button>
                 </div>
             </form>
         </div>
+
+        <div id="customAlert" style="display: none; width: 400px; height: 180 px; position: fixed; top: 10%; left: 50%; transform: translate(-50%, -50%); background: #FED101; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;">
+            <p id="customAlertMessage" style="text-align: center; font-size: 24px">Сообщение</p>
+        </div>
         
+        <div id="customAlertOverlay" onclick="hideCustomAlert()" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
+
     </main>
     <script src="js/script.js"></script>
 </body>

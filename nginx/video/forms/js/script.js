@@ -25,8 +25,8 @@ async function loadUniversities() {
 
         populateUniversitySelect();
     } catch (error) {
-        console.error('Ошибка при загрузке университетов:', error);
-        alert('Не удалось загрузить список университетов');
+        console.error('Ошибка при загрузке учебных заведений:', error);
+        showCustomAlert('Не удалось загрузить список учебных заведений');
     }
 }
 
@@ -36,7 +36,7 @@ function populateUniversitySelect() {
 
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
-    defaultOption.textContent = 'Выберите университет';
+    defaultOption.textContent = 'Выберите учебное заведение';
     defaultOption.selected = true;
     defaultOption.disabled = true;
     universitySelect.appendChild(defaultOption);
@@ -76,10 +76,9 @@ async function populateSupervisorSelect() {
         });
     } catch (error) {
         console.error('Ошибка при загрузке руководителей:', error);
-        alert('Не удалось загрузить список руководителей');
+        showCustomAlert('Не удалось загрузить список руководителей');
     }
 }
-
 
 // Обработка смены университета
 universitySelect.addEventListener('change', async function () {
@@ -115,7 +114,7 @@ universitySelect.addEventListener('change', async function () {
                 universitiesData[selectedUniversity].fields = parsedFields;
             } catch (error) {
                 console.error('Ошибка при загрузке полей формы:', error);
-                alert('Не удалось загрузить поля формы');
+                showCustomAlert('Не удалось загрузить поля формы');
                 return;
             }
         }
@@ -124,7 +123,6 @@ universitySelect.addEventListener('change', async function () {
         submitBtn.classList.remove('hidden');
     }
 });
-
 
 // Создание полей формы
 function createFormFields(fieldsConfig) {
@@ -136,14 +134,33 @@ function createFormFields(fieldsConfig) {
 
         const label = document.createElement('label');
         label.htmlFor = field.name;
-        label.textContent = field.label + (field.required ? '*' : '');
+        label.textContent = field.label;
 
-        const input = document.createElement('input');
-        input.id = field.name;
-        input.name = field.name;
-        input.type = field.type || 'text';
-        input.required = !!field.required;
-        input.className = 'form-control';
+        let input;
+        
+        if (field.type === 'select') {
+            input = document.createElement('select');
+            input.id = field.name;
+            input.name = field.name;
+            input.required = true; 
+            input.className = 'form-control';
+            
+            if (field.options) {
+                field.options.forEach(option => {
+                    const optionElement = document.createElement('option');
+                    optionElement.value = option.value;
+                    optionElement.textContent = option.label;
+                    input.appendChild(optionElement);
+                });
+            }
+        } else {
+            input = document.createElement('input');
+            input.id = field.name;
+            input.name = field.name;
+            input.type = field.type || 'text';
+            input.required = true; // Всегда required
+            input.className = 'form-control';
+        }
 
         if (input.type === 'date') {
             input.classList.add('datepicker');
@@ -162,18 +179,128 @@ function createFormFields(fieldsConfig) {
     });
 }
 
+// Валидация значения поля по типу
+function validateFieldValue(value, type) {
+    if (!value) return true; 
+    
+    switch (type) {
+        case 'number':
+            return !isNaN(value) && isFinite(value);
+        case 'email':
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+        case 'date':
+            return /^\d{2}\.\d{2}\.\d{4}$/.test(value);
+        default:
+            return true; 
+    }
+}
+
+function checkRequiredFields(fieldsConfig) {
+    let allRequiredFilled = true;
+    
+    fieldsConfig.forEach(field => {
+        if (field.required) {
+            const input = document.getElementById(field.name);
+            const value = input.value.trim();
+            
+            if (!value) {
+                input.classList.add('error');
+                
+                let errorElement = input.nextElementSibling;
+                if (!errorElement || !errorElement.classList.contains('error-message')) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'error-message';
+                    errorElement.textContent = 'Это поле обязательно для заполнения';
+                    input.parentNode.insertBefore(errorElement, input.nextSibling);
+                }
+                
+                allRequiredFilled = false;
+            } else {
+                input.classList.remove('error');
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('error-message')) {
+                    errorElement.remove();
+                }
+            }
+        }
+    });
+    
+    return allRequiredFilled;
+}
+
+// Валидация всей формы перед отправкой
+function validateForm(fieldsConfig) {
+    let isValid = true;
+    
+    // Проверка выбора руководителя
+    if (!supervisorSelect.value) {
+        supervisorSelect.classList.add('error');
+        const errorElement = supervisorSelect.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains('error-message')) {
+            const errorMsg = document.createElement('div');
+            errorMsg.className = 'error-message';
+            errorMsg.textContent = 'Выберите руководителя';
+            supervisorSelect.parentNode.insertBefore(errorMsg, supervisorSelect.nextSibling);
+        }
+        isValid = false;
+    } else {
+        supervisorSelect.classList.remove('error');
+        const errorElement = supervisorSelect.nextElementSibling;
+        if (errorElement && errorElement.classList.contains('error-message')) {
+            errorElement.remove();
+        }
+    }
+    
+    fieldsConfig.forEach(field => {
+        const input = document.getElementById(field.name);
+        const value = input.value.trim();
+        
+        // Для обязательных полей проверка уже была, проверяем только заполненные
+        if (value) {
+            if (!validateFieldValue(value, field.type)) {
+                input.classList.add('error');
+                isValid = false;
+                
+                let errorElement = input.nextElementSibling;
+                if (!errorElement || !errorElement.classList.contains('error-message')) {
+                    errorElement = document.createElement('div');
+                    errorElement.className = 'error-message';
+                    input.parentNode.insertBefore(errorElement, input.nextSibling);
+                }
+                
+                errorElement.textContent = getValidationErrorMessage(field.type);
+            }
+        }
+    });
+    
+    return isValid;
+}
+
+function getValidationErrorMessage(type) {
+    switch (type) {
+        case 'number': return 'Введите корректное число';
+        case 'email': return 'Введите корректный email';
+        case 'date': return 'Введите дату в формате ДД.ММ.ГГГГ';
+        default: return 'Некорректное значение';
+    }
+}
+
 // Отправка формы
 dynamicForm.addEventListener('submit', async function (e) {
-    e.preventDefault();
+    e.preventDefault(); 
 
     const selectedUniversity = universitySelect.value;
+
     const university = universitiesData[selectedUniversity];
 
-    const infoArray = [];
+    const isFormValid = validateForm(university.fields);
+    if (!isFormValid) {
+        showCustomAlert('Пожалуйста, исправьте ошибки в форме перед отправкой');
+        return;
+    }
 
-    university.fields.forEach(field => {
-        const value = document.getElementById(field.name).value;
-        infoArray.push(value); // просто массив значений
+    const infoArray = university.fields.map(field => {
+        return document.getElementById(field.name).value;
     });
 
     const formData = {
@@ -181,7 +308,7 @@ dynamicForm.addEventListener('submit', async function (e) {
         info: infoArray
     };
 
-
+    // Отправка данных
     try {
         const token = localStorage.getItem('authToken');
         const headers = {
@@ -195,24 +322,46 @@ dynamicForm.addEventListener('submit', async function (e) {
             body: JSON.stringify(formData)
         });
 
-        if (!response.ok) throw new Error('Ошибка отправки формы');
-
-        const result = await response.json();
-        if (response.ok) {
-            alert('Заявление успешно отправлено!');
-        } else {
-            const errorText = await response.text();
-            alert('Ошибка: ' + (errorText || 'Неизвестная ошибка'));
+        if (!response.ok) {
+            throw new Error(await response.text() || 'Ошибка отправки формы');
         }
 
+        showCustomAlert('Заявление успешно отправлено!');
+        dynamicForm.reset();
+        formFieldsContainer.innerHTML = '';
+        submitBtn.classList.add('hidden');
+        universitySelect.value = '';
+        
     } catch (error) {
         console.error('Ошибка:', error);
-        alert('Ошибка при отправке формы: ' + error.message);
+        showCustomAlert('Ошибка при отправке формы: ' + error.message);
     }
 });
+
+function showCustomAlert(message) {
+    document.getElementById('customAlertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    document.getElementById('customAlertOverlay').style.display = 'block';
+}
+
+function hideCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    document.getElementById('customAlertOverlay').style.display = 'none';
+}
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', () => {
     loadUniversities();
     populateSupervisorSelect();
+});
+
+// Добавляем обработчики для сброса ошибок при вводе
+formFieldsContainer.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+        e.target.classList.remove('error');
+        const errorElement = e.target.nextElementSibling;
+        if (errorElement && errorElement.classList.contains('error-message')) {
+            errorElement.remove();
+        }
+    }
 });

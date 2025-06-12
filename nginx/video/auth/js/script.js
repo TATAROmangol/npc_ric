@@ -15,52 +15,18 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             const response = await fetch('/auth/api/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    login: login,
-                    password: password
-                }),
-                credentials: 'include'
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ login, password }),
+                credentials: 'include' 
             });
 
-            if (response.ok) {
-                successMessage.textContent = 'Вход выполнен успешно! Перенаправление...';
-                successMessage.style.display = 'block';
-                
-                setTimeout(() => {
-                    window.location.href = '/admin/';
-                }, 1500);
-            } else {
-                let errorText = 'Неверный логин или пароль';
-                if (response.status === 405) {
-                    errorText = 'Сервер не разрешает этот метод запроса';
-                }
-                errorMessage.textContent = errorText;
-                errorMessage.style.display = 'block';
-            }
+            if (response.status === 200) {
+                setTimeout(() => window.location.href = '/admin/', 1000);
+            } 
+            
         } catch (error) {
-            console.error('Ошибка сети:', error);
-            errorMessage.textContent = 'Ошибка соединения с сервером';
+            errorMessage.textContent = 'Ошибка сети';
             errorMessage.style.display = 'block';
         }
     });
-
-    async function checkAuthStatus() {
-        try {
-            const response = await fetch('/auth/api/login', {
-                method: 'GET',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                window.location.href = '/admin/';
-            }
-        } catch (error) {
-            console.error('Ошибка проверки авторизации:', error);
-        }
-    }
-
-    checkAuthStatus();
 });
