@@ -3,9 +3,6 @@ name: Docker Compose Deployment
 on:
   push:
     branches: [main]
-    paths:
-      - 'deploy/**'
-      - '.github/workflows/**'
 
 jobs:
   deploy:
