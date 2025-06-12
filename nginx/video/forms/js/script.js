@@ -290,6 +290,17 @@ dynamicForm.addEventListener('submit', async function (e) {
     e.preventDefault(); 
 
     const selectedUniversity = universitySelect.value;
+    const selectedSupervisor = supervisorSelect.value; // Получаем выбранного руководителя
+
+    if (!selectedUniversity) {
+        showCustomAlert('Пожалуйста, выберите учебное заведение');
+        return;
+    }
+
+    if (!selectedSupervisor) {
+        showCustomAlert('Пожалуйста, выберите руководителя практики');
+        return;
+    }
 
     const university = universitiesData[selectedUniversity];
 
@@ -305,6 +316,7 @@ dynamicForm.addEventListener('submit', async function (e) {
 
     const formData = {
         institution_id: university.id,
+        supervisor: selectedSupervisor, // Добавляем руководителя в данные
         info: infoArray
     };
 
@@ -331,6 +343,7 @@ dynamicForm.addEventListener('submit', async function (e) {
         formFieldsContainer.innerHTML = '';
         submitBtn.classList.add('hidden');
         universitySelect.value = '';
+        supervisorSelect.value = ''; // Сбрасываем выбор руководителя
         
     } catch (error) {
         console.error('Ошибка:', error);

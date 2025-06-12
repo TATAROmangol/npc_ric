@@ -36,7 +36,7 @@ header {
 .logout-button {
     position: absolute;
     left: 10px;
-    top: 50%;
+    top: 45%;
     transform: translateY(-50%);
     width: 150px;
     height: 6.2vh;
@@ -156,7 +156,7 @@ button:hover {
 
 .modal-content {
     background-color: #fefefe;
-    margin: 15% auto;
+    margin: 5% auto;
     padding: 20px;
     border-radius: 5px;
     width: 50%;
