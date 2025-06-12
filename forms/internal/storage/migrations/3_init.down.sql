@@ -1,3 +1,0 @@
-DELETE FROM forms WHERE institution_id IN (1, 2, 3);
-DELETE FROM mentors WHERE id IN (1, 2, 3);
-DELETE FROM institutions WHERE inn IN (6660003190, 6663019889, 6659014366);
