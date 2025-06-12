@@ -1,38 +1,186 @@
-name: Production Deploy
-on:
-  push:
-    branches: [main]
+version: '3.8'
 
-jobs:
-  deploy:
-    runs-on: self-hosted
-    steps:
-      # 1. Берем код без самоуправства
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          clean: false  # Не трогаем существующие файлы
-          fetch-depth: 0
+services:
+  nginx:
+    image: nginx
+    container_name: nginx
+    depends_on:
+      auth: 
+        condition: service_started
+      forms:
+        condition: service_started
+      generator:
+        condition: service_started
+    environment:
+      AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
+      AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
+      FORMS_HTTP_PORT: ${FORMS_HTTP_PORT}
+      FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
+      GEN_HTTP_PORT: ${GEN_HTTP_PORT}
+      NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
+      NGINX_HTTP_HOST: ${NGINX_HTTP_HOST}
+      NGINX_GRPC_AUTH_PORT: ${NGINX_GRPC_AUTH_PORT}
+      NGINX_GRPC_FORMS_PORT: ${NGINX_GRPC_FORMS_PORT}
+    expose:
+      - ${NGINX_HTTP_PORT}
+      - ${NGINX_GRPC_AUTH_PORT}
+      - ${NGINX_GRPC_FORMS_PORT}
+    volumes:
+      - ../nginx/templates:/etc/nginx/templates:ro
+      - ../nginx/video:/etc/nginx/video
+      - ../nginx/certs:/etc/nginx/certs:ro
+    ports:
+      - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
+      - ${NGINX_GRPC_AUTH_PORT}:${NGINX_GRPC_AUTH_PORT}
+      - ${NGINX_GRPC_FORMS_PORT}:${NGINX_GRPC_FORMS_PORT}
+      - "443:443"
 
-      # 2. Умная очистка (только что нужно)
-      - name: Clean workspace
-        run: |
-          # Удаляем всё, кроме папки deploy
-          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 \
-            ! -name 'deploy' \
-            -exec rm -rf {} +
-          
-          # Внутри deploy оставляем только нужное
-          find "$GITHUB_WORKSPACE/deploy" -mindepth 1 \
-            ! -name 'postgres_data' \
-            ! -name 'docker-compose.yml' \
-            ! -name '*.env' \
-            -exec rm -rf {} +
+  auth:
+    container_name: auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ../auth
+      dockerfile: Dockerfile
+    environment:
+      AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
+      AUTH_HTTP_HOST: ${AUTH_HTTP_HOST}
+      AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
+      AUTH_GRPC_HOST: ${AUTH_GRPC_HOST}
+      ADMIN_LOGIN: ${ADMIN_LOGIN}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      JWT_KEY: ${JWT_KEY}
+      KAFKA_PORT: ${KAFKA_PORT}
+      KAFKA_HOST: kafka
+      KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+    expose:
+      - ${AUTH_HTTP_PORT}
+      - ${AUTH_GRPC_PORT}
 
-      # 3. Запуск с пересборкой
-      - name: Deploy containers
-        working-directory: ./deploy
-        run: |
-          docker-compose down -v --remove-orphans
-          docker-compose up -d --build --force-recreate
-          docker-compose ps
+  forms:
+    container_name: forms
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ../forms
+      dockerfile: Dockerfile
+    environment:
+      FORMS_HTTP_PORT: ${FORMS_HTTP_PORT}
+      FORMS_HTTP_HOST: ${FORMS_HTTP_HOST}
+      FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
+      FORMS_TABLE_GRPC_HOST: ${FORMS_TABLE_GRPC_HOST}
+      FORMS_AUTH_GRPC_PORT: ${NGINX_GRPC_AUTH_PORT}
+      FORMS_AUTH_GRPC_HOST: nginx
+      PG_HOST: postgres
+      PG_PORT: ${PG_PORT}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB_NAME: ${PG_DB_NAME}
+      PG_SSL: ${PG_SSL}
+      KAFKA_PORT: ${KAFKA_PORT}
+      KAFKA_HOST: kafka
+      KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+    expose:
+      - ${FORMS_HTTP_PORT}
+      - ${FORMS_TABLE_GRPC_PORT}
+
+  generator:
+    container_name: generator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ../generator
+      dockerfile: Dockerfile
+    environment:
+      FORMS_GRPC_HOST: nginx
+      FORMS_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
+      GEN_HTTP_PORT: ${GEN_HTTP_PORT}
+      GEN_HTTP_HOST: ${GEN_HTTP_HOST}
+      PG_HOST: postgres
+      PG_PORT: ${PG_PORT}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB_NAME: ${PG_DB_NAME}
+      PG_SSL: ${PG_SSL}
+    expose:
+      - ${GEN_HTTP_PORT}
+
+  stats:
+    container_name: stats
+    build:
+      context: ../stats
+      dockerfile: Dockerfile
+    environment:
+      KAFKA_PORT: ${KAFKA_PORT}
+      KAFKA_HOST: kafka
+      KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+    depends_on:
+      - kafka
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB_NAME}
+      PGDATA: ${PG_DATA}
+    ports:
+      - ${OUT_PG_PORT}:${PG_PORT}
+    volumes:
+      - ${PG_VOLUME}:${PG_DATA}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.2.1
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - ${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
+    environment:
+      ZOOKEEPER_CLIENT_PORT: ${ZOOKEEPER_PORT}
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    container_name: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:${ZOOKEEPER_PORT}"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT},PLAINTEXT_HOST://localhost:${KAFKA_LOC_PORT}
+      KAFKA_LISTENERS: PLAINTEXT://:${KAFKA_PORT},PLAINTEXT_HOST://:${KAFKA_LOC_PORT}
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "${KAFKA_LOG_TOPIC}:1:1"
+    ports:
+      - ${KAFKA_PORT}:${KAFKA_PORT}
+    volumes:
+      - ./kafka_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+  kafka-ui:
+    container_name: kafka-ui
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - ${KAFKA_UI_PORT}:${KAFKA_UI_PORT}
+    environment:
+      SERVER_PORT: ${KAFKA_UI_PORT}
+      DYNAMIC_CONFIG_ENABLED: true
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_PORT}
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:${ZOOKEEPER_PORT}
+    depends_on:
+      - kafka
+
+volumes:
+  pgdata:
+    driver: local

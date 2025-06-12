@@ -1,5 +1,4 @@
-name: Docker Compose Deployment
-
+name: Production Deploy
 on:
   push:
     branches: [main]
@@ -7,32 +6,33 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    timeout-minutes: 30
-
     steps:
-      - name: Checkout без ебучей очистки
+      # 1. Берем код без самоуправства
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          repository: TATAROmangol/npc_ric
-          clean: false  # чтобы не трогал мои файлы
+          clean: false  # Не трогаем существующие файлы
           fetch-depth: 0
 
-      - name: Чистка только того, что надо
+      # 2. Умная очистка (только что нужно)
+      - name: Clean workspace
         run: |
-          # Блядский workaround для ебанного runner'а
-          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          
           # Удаляем всё, кроме папки deploy
-          find . -mindepth 1 -maxdepth 1 -not -name 'deploy' -exec rm -rf {} +
+          find "$GITHUB_WORKSPACE" -mindepth 1 -maxdepth 1 \
+            ! -name 'deploy' \
+            -exec rm -rf {} +
           
-          # Чистим внутри deploy, кроме postgres_data
-          cd deploy
-          find . -mindepth 1 -not -name 'postgres_data' -not -name 'docker-compose.yml' -exec rm -rf {} +
+          # Внутри deploy оставляем только нужное
+          find "$GITHUB_WORKSPACE/deploy" -mindepth 1 \
+            ! -name 'postgres_data' \
+            ! -name 'docker-compose.yml' \
+            ! -name '*.env' \
+            -exec rm -rf {} +
 
-      - name: Деплой без пиздежа
+      # 3. Запуск с пересборкой
+      - name: Deploy containers
         working-directory: ./deploy
         run: |
-          docker-compose down --remove-orphans --volumes --timeout 30 || true
+          docker-compose down -v --remove-orphans
           docker-compose up -d --build --force-recreate
-          sleep 30
-          docker-compose ps -a
+          docker-compose ps
