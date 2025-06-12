@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log/slog"
+	"log"
 	"stats/config"
 	"stats/kafka"
 )
@@ -9,13 +9,16 @@ import (
 func main() {
 	cfg := config.MustLoad()
 
-	kafkaReader := kafka.New(cfg.Kafka)
+	kafkaReader, err := kafka.New(cfg.Kafka)
+	if err != nil {
+		log.Fatal("Failed to create Kafka reader", "error", err)
+	}
 	defer kafkaReader.Close()
 
 	ch := make(chan string)
 	kafkaReader.StartReading(ch)
 
 	for msg := range ch {
-		slog.Info(msg)
+		log.Println(msg)
 	}
 }
