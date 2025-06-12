@@ -1,4 +1,5 @@
-name: Production Deploy
+name: Docker Compose Deployment
+
 on:
   push:
     branches: [main]
@@ -6,42 +7,37 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    
+    timeout-minutes: 30
+
     steps:
-      # 1. Получаем код (с минимальной очисткой)
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          clean: false
-          fetch-depth: 0
 
-      # 2. Фикс прав для Git (если нужно)
-      - name: Fix Git permissions
+      # - name: Fix Docker permissions
+      #   run: sudo chmod 666 /var/run/docker.sock
+
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v3
+      #   with:
+      #     driver: docker-container
+
+      - name: Install Docker Compose
         run: |
-          git config --global --add safe.directory /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          git config --global --add safe.directory /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
 
-      # 3. Безопасная очистка
-      - name: Clean workspace
-        run: |
-          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          # Удаляем всё, кроме нужных папок
-          find . -mindepth 1 \
-            ! -path './deploy' \
-            ! -path './.git' \
-            -exec rm -rf {} + || true
-
-          cd deploy
-          find . -mindepth 1 \
-            ! -path './postgres_data*' \
-            ! -path './*.env' \
-            ! -path './docker-compose*' \
-            -exec sudo chown -R $USER:$USER {} + 2>/dev/null || true
-
-      # 4. Запуск контейнеров
-      - name: Deploy
+      - name: Deploy services
         working-directory: ./deploy
         run: |
-          docker-compose down --remove-orphans || true
-          docker-compose up -d --build --force-recreate
+          docker-compose pull
+          docker-compose up -d --build
+          sleep 30  # Даем время сервисам запуститься
           docker-compose ps -a
+          docker-compose logs --tail=20
+
+      - name: Verify services
+        working-directory: ./deploy
+        run: |
+          # Проверка Nginx
+          curl -I http://localhost/forms/ || echo "Nginx not responding"
