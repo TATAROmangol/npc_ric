@@ -9,8 +9,6 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      COMPOSE_FILE: deploy/docker-compose.yml
     
     steps:
     - name: Checkout code
@@ -26,8 +24,9 @@ jobs:
         sudo mv docker-compose /usr/local/bin/
         
     - name: Build and deploy
-      working-directory: ./deploy  # Все команды выполняем из папки deploy
+      working-directory: ./deploy  # Переходим в папку deploy
       run: |
-        docker-compose pull
-        docker-compose up -d --build
-        docker-compose ps
+        ls -la  # Проверка содержимого папки (для отладки)
+        docker-compose -f docker-compose.yml pull
+        docker-compose -f docker-compose.yml up -d --build
+        docker-compose -f docker-compose.yml ps
