@@ -1,4 +1,5 @@
 services:
+
   nginx:
       image: nginx
       container_name: nginx
@@ -16,6 +17,7 @@ services:
         FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
         GEN_HTTP_PORT: ${GEN_HTTP_PORT}
         NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
+        NGINX_HTTP_HOST: ${NGINX_HTTP_HOST}
         NGINX_GRPC_AUTH_PORT: ${NGINX_GRPC_AUTH_PORT}
         NGINX_GRPC_FORMS_PORT: ${NGINX_GRPC_FORMS_PORT}
       expose:
@@ -23,11 +25,8 @@ services:
         - ${NGINX_GRPC_AUTH_PORT}
         - ${NGINX_GRPC_FORMS_PORT} 
       volumes:
-        - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         - ../nginx/templates:/etc/nginx/templates:ro
         - ../nginx/video:/etc/nginx/video
-        - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-        - ../nginx/conf.d:/etc/nginx/conf.d:ro
         - ../nginx/certs:/etc/nginx/certs:ro
       ports:
         - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
@@ -121,6 +120,7 @@ services:
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
     depends_on:
       - kafka
+      
 
   postgres:
     image: postgres:latest

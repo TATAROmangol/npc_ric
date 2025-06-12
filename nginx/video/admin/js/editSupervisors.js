@@ -110,7 +110,7 @@ async function init() {
         });
     } catch (error) {
         console.error('Ошибка инициализации:', error);
-        alert('Не удалось загрузить данные руководителей');
+        showCustomAlert("Не удалось загрузить данные руководителей");
     }
 }
 
@@ -182,7 +182,7 @@ async function addMentor() {
     const name = mentorNameInput.value.trim();
     
     if (!name) {
-        alert('Введите ФИО руководителя');
+        showCustomAlert("Введите ФИО руководителя");
         return;
     }
 
@@ -191,17 +191,17 @@ async function addMentor() {
         mentors.push(newMentor);
         renderMentorsList();
         closeAddMentorModal();
-        alert('Руководитель успешно добавлен!');
+        showCustomAlert("Руководитель успешно добавлен");
     } catch (error) {
         console.error('Ошибка добавления руководителя:', error);
-        alert(`Ошибка: ${error.message}`);
+        showCustomAlert(`Ошибка: ${error.message}`);
     }
 }
 
 // Удаление руководителя
 async function deleteMentor() {
     if (!selectedMentor) {
-        alert('Выберите руководителя для удаления');
+        showCustomAlert("Выберите руководителя для удаления");
         return;
     }
     
@@ -211,12 +211,23 @@ async function deleteMentor() {
             mentors = mentors.filter(m => m.id !== selectedMentor.id);
             selectedMentor = null;
             renderMentorsList();
-            alert('Руководитель успешно удален');
+            showCustomAlert("Руководитель успешно удалён");
         } catch (error) {
             console.error('Ошибка удаления руководителя:', error);
-            alert(`Ошибка удаления: ${error.message}`);
+            showCustomAlert(`Ошибка удаления: ${error.message}`);
         }
     }
+}
+
+function showCustomAlert(message) {
+    document.getElementById('customAlertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    document.getElementById('customAlertOverlay').style.display = 'block';
+}
+
+function hideCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    document.getElementById('customAlertOverlay').style.display = 'none';
 }
 
 // Запускаем приложение
