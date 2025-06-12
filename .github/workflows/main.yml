@@ -12,6 +12,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          repository: TATAROmangol/npc_ric
+          clean: true
+          sparse-checkout: |
+            /*
+            !/deploy/postgres_data
 
       # - name: Fix Docker permissions
       #   run: sudo chmod 666 /var/run/docker.sock
@@ -26,10 +32,6 @@ jobs:
       #     sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
       #     sudo chmod +x /usr/local/bin/docker-compose
       #     docker-compose --version
-
-      - name: Clean excluding postgres_data
-        run: |
-          find . -mindepth 1 -not -path './deploy/postgres_data*' -delete
 
       - name: Deploy services
         working-directory: ./deploy
