@@ -15,23 +15,34 @@ jobs:
         with:
           repository: TATAROmangol/npc_ric
           clean: false
+          persist-credentials: false
 
-      - name: Fix permissions (sudo)
+      - name: Full cleanup with sudo
         run: |
-          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          sudo chown -R $USER:$USER ./deploy/postgres_data || true
-          sudo chmod -R 755 ./deploy/postgres_data || true
+          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
+          
+          # Остановка всех контейнеров
+          docker ps -aq | xargs -r docker stop | xargs -r docker rm || true
+          
+          # Полная очистка Docker
+          docker system prune -a -f --volumes || true
+          
+          # Очистка рабочей директории с правами root
+          sudo find "$WORKSPACE" -mindepth 1 -maxdepth 1 \
+            -not -path "$WORKSPACE/deploy" \
+            -not -path "$WORKSPACE/deploy/postgres_data" \
+            -exec rm -rf {} + || true
 
-      - name: Clean workspace
+      - name: Fix permissions
         run: |
-          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          find . -mindepth 1 -not -path './deploy/postgres_data*' -exec rm -rf {} + 2>/dev/null || true
+          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
+          sudo chown -R runner:runner "$WORKSPACE"
+          sudo chmod -R 775 "$WORKSPACE/deploy/postgres_data" || true
 
       - name: Deploy services
         working-directory: ./deploy
         run: |
           docker-compose down --remove-orphans --volumes --timeout 30 || true
-          docker system prune -a -f || true
           docker-compose up -d --build --force-recreate
-          sleep 30
+          sleep 15
           docker-compose ps -a
