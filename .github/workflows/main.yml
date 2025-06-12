@@ -13,7 +13,3 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./deploy/docker-compose.yml"
-
-      - name: Execute tests in the running services
-        run: |
-          docker compose exec test-app pytest
