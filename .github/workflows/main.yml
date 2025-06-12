@@ -2,9 +2,9 @@ name: Docker Compose CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -22,12 +22,12 @@ jobs:
         curl -fsSL https://github.com/docker/compose/releases/download/v2.20.3/docker-compose-linux-x86_64 -o docker-compose
         chmod +x docker-compose
         sudo mv docker-compose /usr/local/bin/
+        docker-compose --version
         
     - name: Build and deploy
-      working-directory: ./deploy  # Переходим в папку deploy
+      working-directory: ./deploy
       run: |
-        # Ensure environment variables are set
         docker-compose -f docker-compose.yml pull
         docker-compose -f docker-compose.yml up -d --build
-        docker-compose -f docker-compose.yml ps
+        docker-compose -f docker-compose.yml ps -a
         docker logs nginx
