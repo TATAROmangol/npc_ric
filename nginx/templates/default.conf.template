@@ -50,3 +50,18 @@ server {
         grpc_set_header X-Real-IP $remote_addr;
     }
 }
+
+server {
+    listen 443 ssl;
+    server_name ${NGINX_HTTPS_HOST};
+
+    ssl_certificate     /etc/nginx/certs/cert.pem;
+    ssl_certificate_key /etc/nginx/certs/key.pem;
+
+    location / {
+        proxy_pass http://generator:${GEN_HTTP_PORT};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 300;
+    }
+}
