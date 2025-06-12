@@ -26,6 +26,7 @@ jobs:
     - name: Build and deploy
       working-directory: ./deploy  # Переходим в папку deploy
       run: |
+        # Ensure environment variables are set
         docker-compose -f docker-compose.yml pull
         docker-compose -f docker-compose.yml up -d --build
         docker-compose -f docker-compose.yml ps
