@@ -1,7 +1,6 @@
 services:
   nginx:
       image: nginx
-      network_mode: host
       container_name: nginx
       depends_on:
         auth: 
@@ -17,7 +16,6 @@ services:
         FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
         GEN_HTTP_PORT: ${GEN_HTTP_PORT}
         NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
-        NGINX_HTTP_HOST: ${NGINX_HTTP_HOST}
         NGINX_GRPC_AUTH_PORT: ${NGINX_GRPC_AUTH_PORT}
         NGINX_GRPC_FORMS_PORT: ${NGINX_GRPC_FORMS_PORT}
       expose:
@@ -28,6 +26,10 @@ services:
         - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         - ../nginx/templates:/etc/nginx/templates:ro
         - ../nginx/video:/etc/nginx/video
+      ports:
+        - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
+        - ${NGINX_GRPC_AUTH_PORT}:${NGINX_GRPC_AUTH_PORT}
+        - ${NGINX_GRPC_FORMS_PORT}:${NGINX_GRPC_FORMS_PORT}
 
   auth:
     container_name: auth
