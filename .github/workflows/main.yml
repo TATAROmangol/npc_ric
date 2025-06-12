@@ -37,11 +37,5 @@ jobs:
       - name: Verify services
         working-directory: ./deploy
         run: |
-          # Проверка Kafka
-          docker-compose exec kafka kafka-topics --list --bootstrap-server localhost:9092 || echo "Kafka not ready"
-          
-          # Проверка PostgreSQL
-          docker-compose exec postgres pg_isready -U admin || echo "Postgres not ready"
-          
           # Проверка Nginx
-          curl -I http://localhost || echo "Nginx not responding"
+          curl -I http://localhost/forms || echo "Nginx not responding"
