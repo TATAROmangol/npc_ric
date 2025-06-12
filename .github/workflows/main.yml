@@ -38,4 +38,4 @@ jobs:
         working-directory: ./deploy
         run: |
           # Проверка Nginx
-          curl -I http://localhost/forms || echo "Nginx not responding"
+          curl -I http://localhost/forms/ || echo "Nginx not responding"
