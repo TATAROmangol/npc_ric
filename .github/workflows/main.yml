@@ -16,16 +16,22 @@ jobs:
           repository: TATAROmangol/npc_ric
           clean: false
 
-      - name: Prepare workspace
+      - name: Fix permissions (sudo)
         run: |
           cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          sudo chmod -R 777 ./deploy/postgres_data || true
-          find . -mindepth 1 -not -path './deploy/postgres_data*' -delete 2>/dev/null || true
+          sudo chown -R $USER:$USER ./deploy/postgres_data || true
+          sudo chmod -R 755 ./deploy/postgres_data || true
+
+      - name: Clean workspace
+        run: |
+          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
+          find . -mindepth 1 -not -path './deploy/postgres_data*' -exec rm -rf {} + 2>/dev/null || true
 
       - name: Deploy services
         working-directory: ./deploy
         run: |
-          docker-compose down -v || true
-          docker-compose up -d --build
+          docker-compose down --remove-orphans --volumes --timeout 30 || true
+          docker system prune -a -f || true
+          docker-compose up -d --build --force-recreate
           sleep 30
           docker-compose ps -a
