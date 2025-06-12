@@ -7,29 +7,27 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      # 1. Забираем код (без лишней очистки)
+      # 1. Отключаем автоочистку, чтобы не трогать postgres_data
       - name: Получить код
         uses: actions/checkout@v4
         with:
-          clean: true  # Полностью чистая копия
-          fetch-depth: 0  # Полная история коммитов
+          clean: false  # Не удалять файлы автоматически
+          persist-credentials: false
 
-      # 2. Настраиваем права (без sudo, если возможно)
-      - name: Установить права
+      # 2. Вручную удаляем только то, что можно
+      - name: Очистка рабочей директории
         run: |
-          chmod -R 775 . || true
-          chown -R $USER:$USER . || true
+          cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
+          # Удаляем всё, кроме папки deploy
+          find . -mindepth 1 -maxdepth 1 ! -name 'deploy' -exec rm -rf {} +
+          # Внутри deploy удаляем всё, кроме postgres_data и .env
+          cd deploy
+          find . -mindepth 1 ! -name 'postgres_data' ! -name '*.env' ! -name 'docker-compose*' -exec rm -rf {} +
 
-      # 3. Развертывание контейнеров
-      - name: Запуск контейнеров
+      # 3. Запускаем контейнеры
+      - name: Развертывание Docker
         working-directory: ./deploy
         run: |
-          # Останавливаем и удаляем старые контейнеры
           docker-compose down -v --remove-orphans || true
-          
-          # Собираем и запускаем новые контейнеры
           docker-compose up -d --build --force-recreate
-          
-          # Проверяем статус
           docker-compose ps
-          docker ps -a
