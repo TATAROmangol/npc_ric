@@ -1,3 +1,23 @@
+async function checkAuth() {
+    try {
+        const response = await fetch('/admin/api/get/institutions', {
+            method: 'GET',
+            credentials: 'include' 
+        });
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                setTimeout(() => window.location.href = '/auth/', 2000);
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        showCustomAlert("Введен неправильный логин или пароль");
+        console.error('Ошибка проверки авторизации:', error);
+        setTimeout(() => window.location.href = '/auth/', 6000);
+    }
+}
+
 class ApiService {
     constructor() {
         this.adminBaseUrl = '/admin/api';
@@ -16,22 +36,18 @@ class ApiService {
         const response = await fetch(url, options);
         if (!response.ok) {
             try {
-                // Пытаемся прочитать JSON-ошибку, если есть тело ответа
                 const errorData = await response.json();
                 console.error('Детали ошибки:', errorData);
                 throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
             } catch (e) {
-                // Если не удалось прочитать JSON (например, пустое тело ответа)
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
         }
         
-        // Если статус 204 (No Content) - возвращаем null
         if (response.status === 204) {
             return null;
         }
         
-        // В остальных случаях пытаемся прочитать JSON
         try {
             return await response.json();
         } catch (e) {
@@ -49,14 +65,12 @@ class ApiService {
     }
 
     async addInstitution(data) {
-        // Гарантируем правильный формат данных
         const requestData = {
             name: String(data.Name).trim(),
             inn: Number(data.INN),
             columns: Array.isArray(data.Columns) ? data.Columns : [String]
         };
 
-        // Валидация
         if (!requestData.name) throw new Error('Название обязательно');
         if (isNaN(requestData.inn)) throw new Error('ИНН должен быть числом');
 
@@ -94,9 +108,7 @@ class ApiService {
             },
             body: JSON.stringify({ id })
         });
-        
-        // Если мы здесь, значит запрос выполнен успешно (status 200-299)
-        // Даже если сервер не вернул тело ответа
+
         return true;
     }
 
@@ -110,7 +122,7 @@ class ApiService {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ institution_id: id }) // ← ключ должен быть именно institution_id
+            body: JSON.stringify({ institution_id: id }) 
         });
     }
 
@@ -126,7 +138,7 @@ class ApiService {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ 
-                id: id,          // ← ключ, который ожидает сервер
+                id: id,          
                 columns: columns 
             })
         });
@@ -207,6 +219,7 @@ const closeFormBtn = document.querySelector('.close-form-btn');
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuth();
     try {
         await loadInstitutions();
         
@@ -227,7 +240,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
-        alert('Произошла ошибка при загрузке данных');
     }
 });
 
@@ -242,7 +254,7 @@ function renderInstitutionsList() {
     institutionsList.innerHTML = '';
     
     if (!institutions || institutions.length === 0) {
-        institutionsList.innerHTML = '<div class="empty">Нет данных об университетах</div>';
+        institutionsList.innerHTML = '<div class="empty">Нет данных об учебных заведениях</div>';
         return;
     }
     
@@ -257,12 +269,10 @@ function renderInstitutionsList() {
 }
 
 function selectInstitution(institution) {
-    // Снимаем выделение со всех элементов
     document.querySelectorAll('.list-item').forEach(item => {
         item.classList.remove('selected');
     });
     
-    // Выделяем выбранный
     const items = Array.from(document.querySelectorAll('.list-item'));
     const selectedItem = items.find(item => item.textContent === institution.name);
     if (selectedItem) {
@@ -299,11 +309,11 @@ async function addInstitution() {
         await apiService.addInstitution({
             Name: name,
             INN: inn,
-            Columns: [String] // Явно указываем пустой массив columns
+            Columns: [String] 
         });
-        alert('Университет успешно добавлен!');
+        alert('Учебное заведение успешно добавлено!');
         closeAddInstitutionModal();
-        await loadInstitutions(); // Обновляем список
+        await loadInstitutions(); 
     } catch (error) {
         console.error('Ошибка:', error);
         alert(`Ошибка: ${error.message}`);
@@ -335,7 +345,6 @@ async function renderFormFields(institution) {
         const response = await apiService.getFormColumns(institution.id);
         console.log("Сервер вернул поля формы:", response);
 
-        // Обрабатываем возможные форматы
         const rawFields = Array.isArray(response)
         ? response
         : (response?.columns || response?.data?.columns || []);
@@ -354,7 +363,6 @@ async function renderFormFields(institution) {
         rawFields.forEach((field, index) => {
             let fieldData = {};
 
-            // Если поле — это строка (старая структура: []string)
             if (typeof field === 'string') {
                 fieldData = {
                     label: field,
@@ -362,7 +370,6 @@ async function renderFormFields(institution) {
                     required: false
                 };
             } else {
-                // Новая структура с объектами
                 fieldData = {
                     label: field.label || '',
                     type: field.type || 'text',
@@ -377,19 +384,8 @@ async function renderFormFields(institution) {
                     <label>Название поля:</label>
                     <input type="text" value="${fieldData.label}" class="field-label">
                 </div>
-                <div class="form-group">
-                    <label>Тип поля:</label>
-                    <select class="field-type">
-                        <option value="text" ${fieldData.type === 'text' ? 'selected' : ''}>Текст</option>
-                        <option value="date" ${fieldData.type === 'date' ? 'selected' : ''}>Дата</option>
-                        <option value="number" ${fieldData.type === 'number' ? 'selected' : ''}>Число</option>
-                        <option value="email" ${fieldData.type === 'email' ? 'selected' : ''}>Email</option>
-                    </select>
-                </div>
-                <div class="form-group checkbox-group">
-                    <label for="required">Обязательное поле:</label>
-                    <input id="required" type="checkbox" class="field-required" ${fieldData.required ? 'checked' : ''}>
-                </div>
+
+                
                 <button class="remove-field-btn">Удалить</button>
             `;
             formFieldsContainer.appendChild(fieldElement);
@@ -443,7 +439,6 @@ async function saveFormFields() {
     document.querySelectorAll('.form-field').forEach(fieldEl => {
         const label = fieldEl.querySelector('.field-label').value.trim();
 
-        // Помечаем, если хотя бы одно поле пустое
         if (!label) {
             hasEmptyField = true;
         } else {
@@ -473,8 +468,17 @@ async function saveFormFields() {
     }
 }
 
-
-
+document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+    try {
+        await fetch('/auth/api/logout', { 
+            method: 'POST',
+            credentials: 'include' 
+        });
+        window.location.href = '/auth/';
+    } catch (error) {
+        console.error('Ошибка выхода:', error);
+    }
+});
 
 // Обработчик удаления поля формы
 formFieldsContainer.addEventListener('click', (e) => {
@@ -486,20 +490,20 @@ formFieldsContainer.addEventListener('click', (e) => {
 // Функция удаления вуза
 async function deleteInstitution() {
     if (!selectedInstitution) {
-        alert('Выберите ВУЗ для удаления');
+        alert('Выберите учебное заведение для удаления');
         return;
     }
     
-    if (confirm(`Удалить ВУЗ "${selectedInstitution.name}"?`)) {
+    if (confirm(`Удалить учебное заведение "${selectedInstitution.name}"?`)) {
         try {
             await apiService.deleteInstitution(selectedInstitution.id);
             institutions = institutions.filter(m => m.id !== selectedInstitution.id);
             selectedInstitution = null;
             renderInstitutionsList();
             actionPanel.classList.add('hidden'); // Скрываем панель действий
-            alert('ВУЗ успешно удален');
+            alert('учебное заведение успешно удалено');
         } catch (error) {
-            console.error('Ошибка удаления ВУЗа:', error);
+            console.error('Ошибка удаления учебного заведения:', error);
             alert(`Ошибка удаления: ${error.message}`);
         }
     }
@@ -514,7 +518,7 @@ closeFormBtn.addEventListener('click', closeFormEditorModal);
 
 document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
     if (!selectedInstitution) {
-        alert("Сначала выберите университет.");
+        alert("Сначала выберите учебное заведение.");
         return;
     }
     document.getElementById('templateUploadInput').click();
@@ -528,7 +532,7 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
     }
 
     if (!selectedInstitution) {
-        alert("Сначала выберите университет.");
+        alert("Сначала выберите учебное заведение.");
         return;
     }
 
@@ -556,7 +560,7 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
 
 generateDocBtn.addEventListener('click', async () => {
     if (!selectedInstitution) {
-        alert("Выберите ВУЗ перед генерацией документа.");
+        alert("Выберите учебное заведение перед генерацией документа.");
         return;
     }
 
@@ -583,3 +587,14 @@ generateDocBtn.addEventListener('click', async () => {
         alert("Ошибка генерации: " + error.message);
     }
 });
+
+function showCustomAlert(message) {
+    document.getElementById('customAlertMessage').textContent = message;
+    document.getElementById('customAlert').style.display = 'block';
+    document.getElementById('customAlertOverlay').style.display = 'block';
+}
+
+function hideCustomAlert() {
+    document.getElementById('customAlert').style.display = 'none';
+    document.getElementById('customAlertOverlay').style.display = 'none';
+}

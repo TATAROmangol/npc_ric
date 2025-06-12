@@ -169,7 +169,7 @@ function selectMentor(mentor) {
 
 // Работа с модальным окном
 function openAddMentorModal() {
-    console.log('Функция openAddMentorModal вызвана'); // Добавьте это
+    console.log('Функция openAddMentorModal вызвана'); 
     mentorNameInput.value = '';
     addMentorModal.style.display = 'block';
 }

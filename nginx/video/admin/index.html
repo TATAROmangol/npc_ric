@@ -6,25 +6,25 @@
     <link rel="stylesheet" href="css\style.css"/>
 </head>
 <body>
-    <header>
-        <h1>Партнёры</h1>
+    <header class= "admin-header">
+        <button class="logout-button" id="logoutBtn">Выйти</button>
+        <h1 class="center">Партнёры</h1>
     </header>
     <main>
         <h3>Список учебных заведений партнёров</h3>
         <div class="list" id="institutionsList">
-            <!-- Список вузов будет здесь -->
         </div>
 
         <div class="action-panel hidden" id="actionPanel">
             <button id="generateDocBtn">Сформировать документ</button>
             <button id="editFormBtn">Редактировать форму студента</button>
-            <button id="deleteInstitutionBtn">Удалить вуз</button>
+            <button id="deleteInstitutionBtn">Удалить учебное заведение</button>
             <input type="file" id="templateUploadInput" accept=".docx" style="display: none;">
             <button id="uploadTemplateBtn">Загрузить шаблон</button>
         </div>
 
         <div class="main-button-panel">
-            <button id="openModalBtn">Добавить университет</button> 
+            <button id="openModalBtn">Добавить учебное заведение</button> 
             <button onclick="window.location.href='edit_supervisor.html'">Редактировать руководителей практики</button>
         </div>
 
@@ -32,17 +32,18 @@
         <div id="addInstitutionModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>Добавить университет</h2>
+                    <h2>Добавить учебное заведение</h2>
                     <span class="close-btn">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="institutionName" placeholder="Название университета">
+                    <input type="text" id="institutionName" placeholder="Название учебного заведения">
                     <input 
                         type="text" 
                         id="institutionINN" 
                         pattern="\d*"          
                         inputmode="numeric"    
                         title="Введите только цифры"
+                        placeholder="ИНН"
                     >
                 </div>
                 <div class="modal-footer">
@@ -71,6 +72,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Модальное окно alert -->
+        <div id="customAlert" style="display: none; width: 400px; height: 180 px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #FED101; padding: 20px; border-radius: 8px; border: 3px solid red; box-shadow: 0 0 10px rgba(0,0,0,0.3); z-index: 1000;">
+            <p id="customAlertMessage" style="text-align: center; font-size: 24px">Сообщение</p>
+        </div>
+        <div id="customAlertOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;"></div>
     </main>
     <script src="js/script.js"></script>
 </body>
