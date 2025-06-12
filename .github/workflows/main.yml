@@ -10,44 +10,28 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Prepare workspace
-        run: |
-          # Аккуратно очищаем workspace, сохраняя postgres_data
-          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
-          if [ -d "$WORKSPACE" ]; then
-            find "$WORKSPACE" -mindepth 1 \
-              -not -path "$WORKSPACE/deploy/postgres_data*" \
-              -exec rm -rf {} + 2>/dev/null || true
-          fi
-          
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           repository: TATAROmangol/npc_ric
-          clean: false
+          clean: false  # Ключевое изменение - отключаем очистку
 
-      # - name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v3
-      #   with:
-      #     driver: docker-container
-
-      # - name: Install Docker Compose
-      #   run: |
-      #     sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      #     sudo chmod +x /usr/local/bin/docker-compose
-      #     docker-compose --version
+      - name: Stop and cleanup containers
+        working-directory: ./deploy
+        run: |
+          docker-compose down || true
+          # Дополнительная очистка, если нужно
+          docker system prune -f
 
       - name: Deploy services
         working-directory: ./deploy
         run: |
-          docker-compose pull
           docker-compose up -d --build
-          sleep 30  # Даем время сервисам запуститься
+          sleep 30
           docker-compose ps -a
           docker-compose logs --tail=20
 
       - name: Verify services
         working-directory: ./deploy
         run: |
-          # Проверка Nginx
           curl -I http://localhost/forms/ || echo "Nginx not responding"
