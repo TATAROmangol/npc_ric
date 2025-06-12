@@ -10,39 +10,38 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: Checkout code (без очистки)
         uses: actions/checkout@v4
         with:
           repository: TATAROmangol/npc_ric
           clean: false
-          persist-credentials: false
+          fetch-depth: 0
 
-      - name: Full cleanup with sudo
+      - name: Prepare environment
         run: |
           WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
           
-          # Остановка всех контейнеров
-          docker ps -aq | xargs -r docker stop | xargs -r docker rm || true
-          
+          # Устанавливаем правильные права
+          sudo chown -R github-runner:github-runner "$WORKSPACE"
+          sudo chmod -R 775 "$WORKSPACE"
+
+          # Очищаем всё, кроме нужных папок
+          cd "$WORKSPACE"
+          find . -mindepth 1 \
+            -not -path './deploy' \
+            -not -path './deploy/postgres_data*' \
+            -exec sudo rm -rf {} + 2>/dev/null || true
+
+      - name: Clean Docker environment
+        run: |
           # Полная очистка Docker
-          docker system prune -a -f --volumes || true
-          
-          # Очистка рабочей директории с правами root
-          sudo find "$WORKSPACE" -mindepth 1 -maxdepth 1 \
-            -not -path "$WORKSPACE/deploy" \
-            -not -path "$WORKSPACE/deploy/postgres_data" \
-            -exec rm -rf {} + || true
-
-      - name: Fix permissions
-        run: |
-          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
-          sudo chown -R runner:runner "$WORKSPACE"
-          sudo chmod -R 775 "$WORKSPACE/deploy/postgres_data" || true
+          docker-compose -f ./deploy/docker-compose.yml down --remove-orphans --volumes --timeout 30 || true
+          docker system prune -a -f || true
 
       - name: Deploy services
         working-directory: ./deploy
         run: |
-          docker-compose down --remove-orphans --volumes --timeout 30 || true
           docker-compose up -d --build --force-recreate
-          sleep 15
+          sleep 30
           docker-compose ps -a
+          docker logs auth  # Для отладки
