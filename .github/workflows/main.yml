@@ -6,28 +6,42 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    
     steps:
-      # 1. Отключаем автоочистку, чтобы не трогать postgres_data
-      - name: Получить код
+      # 1. Получаем код (с минимальной очисткой)
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          clean: false  # Не удалять файлы автоматически
-          persist-credentials: false
+          clean: false
+          fetch-depth: 0
 
-      # 2. Вручную удаляем только то, что можно
-      - name: Очистка рабочей директории
+      # 2. Фикс прав для Git (если нужно)
+      - name: Fix Git permissions
+        run: |
+          git config --global --add safe.directory /home/github-runner/actions-runner/_work/npc_ric/npc_ric
+          git config --global --add safe.directory /home/github-runner/actions-runner/_work/npc_ric/npc_ric/deploy
+
+      # 3. Безопасная очистка
+      - name: Clean workspace
         run: |
           cd /home/github-runner/actions-runner/_work/npc_ric/npc_ric
-          # Удаляем всё, кроме папки deploy
-          find . -mindepth 1 -maxdepth 1 ! -name 'deploy' -exec rm -rf {} +
-          # Внутри deploy удаляем всё, кроме postgres_data и .env
-          cd deploy
-          find . -mindepth 1 ! -name 'postgres_data' ! -name '*.env' ! -name 'docker-compose*' -exec rm -rf {} +
+          # Удаляем всё, кроме нужных папок
+          find . -mindepth 1 \
+            ! -path './deploy' \
+            ! -path './.git' \
+            -exec rm -rf {} + || true
 
-      # 3. Запускаем контейнеры
-      - name: Развертывание Docker
+          cd deploy
+          find . -mindepth 1 \
+            ! -path './postgres_data*' \
+            ! -path './*.env' \
+            ! -path './docker-compose*' \
+            -exec sudo chown -R $USER:$USER {} + 2>/dev/null || true
+
+      # 4. Запуск контейнеров
+      - name: Deploy
         working-directory: ./deploy
         run: |
-          docker-compose down -v --remove-orphans || true
+          docker-compose down --remove-orphans || true
           docker-compose up -d --build --force-recreate
-          docker-compose ps
+          docker-compose ps -a
