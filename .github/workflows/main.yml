@@ -13,3 +13,8 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         with:
           compose-file: "./deploy/docker-compose.yml"
+          pull: true
+          build: true
+          up: true
+          detach: true
+          down: false
