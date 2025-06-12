@@ -26,7 +26,7 @@ jobs:
         sudo mv docker-compose /usr/local/bin/
         
     - name: Build and deploy
-      working-directory: ../../deploy  # Все команды выполняем из папки deploy
+      working-directory: ./deploy  # Все команды выполняем из папки deploy
       run: |
         docker-compose pull
         docker-compose up -d --build
