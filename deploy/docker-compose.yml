@@ -1,42 +1,44 @@
 services:
   nginx:
-      image: nginx
-      container_name: nginx
-      depends_on:
-        auth: 
-          condition: service_started
-        forms:
-          condition: service_started
-        generator:
-          condition: service_started
-      environment:
-        AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
-        AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
-        FORMS_HTTP_PORT: ${FORMS_HTTP_PORT}
-        FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
-        GEN_HTTP_PORT: ${GEN_HTTP_PORT}
-        NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
-        NGINX_GRPC_AUTH_PORT: ${NGINX_GRPC_AUTH_PORT}
-        NGINX_GRPC_FORMS_PORT: ${NGINX_GRPC_FORMS_PORT}
-      expose:
-        - ${NGINX_HTTP_PORT}
-        - ${NGINX_GRPC_AUTH_PORT}
-        - ${NGINX_GRPC_FORMS_PORT} 
-      volumes:
-        - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-        - ../nginx/templates:/etc/nginx/templates:ro
-        - ../nginx/video:/etc/nginx/video
-      ports:
-        - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
-        - ${NGINX_GRPC_AUTH_PORT}:${NGINX_GRPC_AUTH_PORT}
-        - ${NGINX_GRPC_FORMS_PORT}:${NGINX_GRPC_FORMS_PORT}
+    image: nginx
+    container_name: nginx
+    depends_on:
+      auth: 
+        condition: service_started
+      forms:
+        condition: service_started
+      generator:
+        condition: service_started
+    environment:
+      AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
+      AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
+      FORMS_HTTP_PORT: ${FORMS_HTTP_PORT}
+      FORMS_TABLE_GRPC_PORT: ${FORMS_TABLE_GRPC_PORT}
+      GEN_HTTP_PORT: ${GEN_HTTP_PORT}
+      NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
+      NGINX_HTTP_HOST: ${NGINX_HTTP_HOST}
+      NGINX_GRPC_AUTH_PORT: ${NGINX_GRPC_AUTH_PORT}
+      NGINX_GRPC_FORMS_PORT: ${NGINX_GRPC_FORMS_PORT}
+    expose:
+      - ${NGINX_HTTP_PORT}
+      - ${NGINX_GRPC_AUTH_PORT}
+      - ${NGINX_GRPC_FORMS_PORT}
+    volumes:
+      - ../nginx/templates:/etc/nginx/templates:ro
+      - ../nginx/video:/etc/nginx/video
+      - ../nginx/certs:/etc/nginx/certs:ro
+    ports:
+      - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
+      - ${NGINX_GRPC_AUTH_PORT}:${NGINX_GRPC_AUTH_PORT}
+      - ${NGINX_GRPC_FORMS_PORT}:${NGINX_GRPC_FORMS_PORT}
+      - "443:443"
 
   auth:
     container_name: auth
     depends_on:
       postgres:
         condition: service_healthy
-    build: 
+    build:
       context: ../auth
       dockerfile: Dockerfile
     environment:
@@ -59,7 +61,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    build: 
+    build:
       context: ../forms
       dockerfile: Dockerfile
     environment:
@@ -79,24 +81,22 @@ services:
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
     expose:
-      - ${AUTH_HTTP_PORT}
-      - ${AUTH_GRPC_PORT}
+      - ${FORMS_HTTP_PORT}
+      - ${FORMS_TABLE_GRPC_PORT}
 
   generator:
     container_name: generator
     depends_on:
       postgres:
         condition: service_healthy
-    build: 
+    build:
       context: ../generator
       dockerfile: Dockerfile
     environment:
-      FORMS_GRPC_HOST: forms
-      FORMS_GRPC_PORT: 50050
-      GEN_HTTP_PORT: 8082
-      GEN_HTTP_HOST: 0.0.0.0
-      GEN_GRPC_PORT: 9000
-      GEN_GRPC_HOST: 0.0.0.0
+      FORMS_GRPC_HOST: nginx
+      FORMS_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
+      GEN_HTTP_PORT: ${GEN_HTTP_PORT}
+      GEN_HTTP_HOST: ${GEN_HTTP_HOST}
       PG_HOST: postgres
       PG_PORT: ${PG_PORT}
       PG_USER: ${PG_USER}
@@ -104,14 +104,11 @@ services:
       PG_DB_NAME: ${PG_DB_NAME}
       PG_SSL: ${PG_SSL}
     expose:
-      - ${AUTH_HTTP_PORT}
-      - ${AUTH_GRPC_PORT}
-    ports:
-      - "8082:8000"
+      - ${GEN_HTTP_PORT}
 
   stats:
     container_name: stats
-    build: 
+    build:
       context: ../stats
       dockerfile: Dockerfile
     environment:
@@ -122,41 +119,23 @@ services:
       - kafka
 
   postgres:
-    image: postgres:latest
+    image: postgres:15-alpine
     container_name: postgres
     environment:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: ${PG_DB_NAME}
-      PGDATA: ${PG_DATA}
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - ${OUT_PG_PORT}:${PG_PORT}
+      - "${OUT_PG_PORT}:${PG_PORT}"
     volumes:
-      - ${PG_VOLUME}:${PG_DATA}
-    deploy:
-      resources:
-        limits:
-          cpus: '0.50'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    command: >
-      postgres -c max_connections=1000
-               -c shared_buffers=256MB
-               -c effective_cache_size=768MB
-               -c maintenance_work_mem=64MB
-               -c checkpoint_completion_target=0.7
-               -c wal_buffers=16MB
-               -c default_statistics_target=100
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB_NAME}" ]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
       retries: 5
     restart: unless-stopped
-    tty: true
-    stdin_open: true
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.2.1
@@ -186,7 +165,7 @@ services:
       - ./kafka_data:/bitnami/kafka
     depends_on:
       - zookeeper
-    
+
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
@@ -201,5 +180,5 @@ services:
       - kafka
 
 volumes:
-  pgdata:
+  postgres_data:
     driver: local
