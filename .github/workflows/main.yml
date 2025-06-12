@@ -16,8 +16,8 @@ jobs:
           repository: TATAROmangol/npc_ric
           clean: false
 
-      # - name: Fix Docker permissions
-      #   run: sudo chmod 666 /var/run/docker.sock
+      - name: Fix Docker permissions
+        run: sudo chmod 666 /var/run/docker.sock
 
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v3
