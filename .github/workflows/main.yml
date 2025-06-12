@@ -7,38 +7,29 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-      # 1. Отключаем автоматическую очистку
-      - name: Checkout code
+      # 1. Забираем код (без лишней очистки)
+      - name: Получить код
         uses: actions/checkout@v4
         with:
-          clean: false  # Важно: отключаем встроенную очистку
-          persist-credentials: false
+          clean: true  # Полностью чистая копия
+          fetch-depth: 0  # Полная история коммитов
 
-      # 2. Вручную очищаем только нужные части
-      - name: Custom clean
+      # 2. Настраиваем права (без sudo, если возможно)
+      - name: Установить права
         run: |
-          WORKSPACE="/home/github-runner/actions-runner/_work/npc_ric/npc_ric"
-          
-          # Даем права на всю папку (если нужно)
-          sudo chown -R $USER:$USER "$WORKSPACE" || true
-          sudo chmod -R 775 "$WORKSPACE" || true
+          chmod -R 775 . || true
+          chown -R $USER:$USER . || true
 
-          # Удаляем всё, кроме папки deploy
-          find "$WORKSPACE" -mindepth 1 -maxdepth 1 \
-            ! -path "$WORKSPACE/deploy" \
-            -exec sudo rm -rf {} + || true
-
-          # Внутри deploy оставляем только нужное
-          find "$WORKSPACE/deploy" -mindepth 1 \
-            ! -path "$WORKSPACE/deploy/postgres_data*" \
-            ! -path "$WORKSPACE/deploy/docker-compose*" \
-            ! -path "$WORKSPACE/deploy/*.env" \
-            -exec sudo rm -rf {} + || true
-
-      # 3. Полная пересборка контейнеров
-      - name: Deploy containers
+      # 3. Развертывание контейнеров
+      - name: Запуск контейнеров
         working-directory: ./deploy
         run: |
+          # Останавливаем и удаляем старые контейнеры
           docker-compose down -v --remove-orphans || true
+          
+          # Собираем и запускаем новые контейнеры
           docker-compose up -d --build --force-recreate
+          
+          # Проверяем статус
           docker-compose ps
+          docker ps -a
