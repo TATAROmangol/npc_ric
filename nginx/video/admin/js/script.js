@@ -301,7 +301,7 @@ async function addInstitution() {
     const inn = institutionINNInput.value.trim();
 
     if (!name || !inn) {
-        alert('Заполните все обязательные поля');
+        showCustomAlert('Заполните все обязательные поля');
         return;
     }
 
@@ -311,12 +311,12 @@ async function addInstitution() {
             INN: inn,
             Columns: [String] 
         });
-        alert('Учебное заведение успешно добавлено!');
+        showCustomAlert('Учебное заведение успешно добавлено!');
         closeAddInstitutionModal();
         await loadInstitutions(); 
     } catch (error) {
         console.error('Ошибка:', error);
-        alert(`Ошибка: ${error.message}`);
+        showCustomAlert(`Ошибка: ${error.message}`);
     }
 }
 
@@ -330,7 +330,7 @@ async function openFormEditorModal() {
         formEditorModal.style.display = 'block';
     } catch (error) {
         console.error('Ошибка при загрузке формы:', error);
-        alert('Произошла ошибка при загрузке формы');
+        showCustomAlert('Произошла ошибка при загрузке формы');
     }
 }
 
@@ -447,7 +447,7 @@ async function saveFormFields() {
     });
 
     if (hasEmptyField) {
-        alert('Пожалуйста, заполните все поля или удалите пустые перед сохранением.');
+        showCustomAlert('Пожалуйста, заполните все поля или удалите пустые перед сохранением.');
         return;
     }
 
@@ -461,10 +461,10 @@ async function saveFormFields() {
     try {
         await apiService.updateFormColumns(selectedInstitution.id, fields);
         closeFormEditorModal();
-        alert('Форма успешно сохранена!');
+        showCustomAlert('Форма успешно сохранена!');
     } catch (error) {
         console.error('Ошибка при сохранении формы:', error);
-        alert('Произошла ошибка при сохранении формы');
+        showCustomAlert('Произошла ошибка при сохранении формы');
     }
 }
 
@@ -490,7 +490,7 @@ formFieldsContainer.addEventListener('click', (e) => {
 // Функция удаления вуза
 async function deleteInstitution() {
     if (!selectedInstitution) {
-        alert('Выберите учебное заведение для удаления');
+        showCustomAlert('Выберите учебное заведение для удаления');
         return;
     }
     
@@ -501,10 +501,10 @@ async function deleteInstitution() {
             selectedInstitution = null;
             renderInstitutionsList();
             actionPanel.classList.add('hidden'); // Скрываем панель действий
-            alert('учебное заведение успешно удалено');
+            showCustomAlert('Учебное заведение успешно удалено');
         } catch (error) {
             console.error('Ошибка удаления учебного заведения:', error);
-            alert(`Ошибка удаления: ${error.message}`);
+            showCustomAlert(`Ошибка удаления: ${error.message}`);
         }
     }
 }
@@ -518,7 +518,7 @@ closeFormBtn.addEventListener('click', closeFormEditorModal);
 
 document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
     if (!selectedInstitution) {
-        alert("Сначала выберите учебное заведение.");
+        showCustomAlert("Сначала выберите учебное заведение.");
         return;
     }
     document.getElementById('templateUploadInput').click();
@@ -527,12 +527,12 @@ document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
 document.getElementById('templateUploadInput').addEventListener('change', function () {
     const file = this.files[0];
     if (!file || !file.name.endsWith('.docx')) {
-        alert('Пожалуйста, выберите файл формата .docx');
+        showCustomAlert('Пожалуйста, выберите файл формата .docx');
         return;
     }
 
     if (!selectedInstitution) {
-        alert("Сначала выберите учебное заведение.");
+        showCustomAlert("Сначала выберите учебное заведение.");
         return;
     }
 
@@ -551,16 +551,16 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
         return response.json();
     })
     .then(result => {
-        alert('Шаблон успешно загружен для "' + selectedInstitution.name + '"');
+        showCustomAlert('Шаблон успешно загружен для "' + selectedInstitution.name + '"');
     })
     .catch(error => {
-        alert('Ошибка: ' + error.message);
+        showCustomAlert('Ошибка: ' + error.message);
     });
 });
 
 generateDocBtn.addEventListener('click', async () => {
     if (!selectedInstitution) {
-        alert("Выберите учебное заведение перед генерацией документа.");
+        showCustomAlert("Выберите учебное заведение перед генерацией документа.");
         return;
     }
 
@@ -584,7 +584,7 @@ generateDocBtn.addEventListener('click', async () => {
         window.open(`http://localhost:8082${result.download_url}`, "_blank");
     } catch (error) {
         console.error("Ошибка генерации:", error);
-        alert("Ошибка генерации: " + error.message);
+        showCustomAlert("Ошибка генерации: " + error.message);
     }
 });
 
