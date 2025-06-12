@@ -3,6 +3,7 @@ name: Docker Compose Deployment
 on:
   push:
     branches: [main]
+    
 
 jobs:
   deploy:
