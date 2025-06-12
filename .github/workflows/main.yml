@@ -19,8 +19,6 @@ jobs:
         with:
           driver: docker-container
           buildkitd-flags: --allow-insecure-entitlement security.insecure
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Deploy services
         working-directory: ./deploy
