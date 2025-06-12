@@ -3,7 +3,6 @@ name: Docker Compose Deployment
 on:
   push:
     branches: [main]
-    
 
 jobs:
   deploy:
@@ -18,17 +17,25 @@ jobs:
         uses: docker/setup-buildx-action@v3
         with:
           driver: docker-container
+          buildkitd-flags: --allow-insecure-entitlement security.insecure
 
-      - name: Deploy services
+      - name: Build with cache using Compose
         working-directory: ./deploy
         run: |
+          # Сначала собираем с кэшированием
           docker buildx build \
-          --cache-from type=gha \
-          --cache-to type=gha,mode=max \
-          -t deploy \
-          .
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max \
+            --load \
+            -t your-service-name \
+            .
+          
+          # Затем запускаем compose
+          docker-compose up -d --build
 
       - name: Verify services
         working-directory: ./deploy
         run: |
+          docker-compose ps -a
+          docker-compose logs --tail=20
           curl -I http://localhost/forms/ || echo "Nginx not responding"
