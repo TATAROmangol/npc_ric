@@ -104,7 +104,10 @@ services:
       PG_DB_NAME: ${PG_DB_NAME}
       PG_SSL: ${PG_SSL}
     expose:
-      - ${GEN_HTTP_PORT}
+      - ${AUTH_HTTP_PORT}
+      - ${AUTH_GRPC_PORT}
+    ports:
+      - "8082:8000"
 
   stats:
     container_name: stats
