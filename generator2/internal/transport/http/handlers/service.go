@@ -10,7 +10,11 @@ func (h *Handlers) DeleteTemplate() http.Handler {
 
 func (h *Handlers) GetAllTemplates() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		if err := h.srv.GetAllTemplates(); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
 }
 

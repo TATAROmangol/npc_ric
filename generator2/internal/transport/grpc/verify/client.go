@@ -16,7 +16,7 @@ type Client struct {
 	client authpb.VerifyClient
 }
 
-func NewClient(cfg Config) *Client {
+func New(cfg Config) *Client {
 	return &Client{
 		cfg: cfg,
 		conn: nil,

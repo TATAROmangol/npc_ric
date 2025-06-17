@@ -4,18 +4,18 @@ import (
 	"context"
 )
 
-type Verifier interface{
+type Verifier interface {
 	Verify(ctx context.Context, token string) (bool, error)
 }
 
-type Midleware struct {
+type Midlewares struct {
 	ctx context.Context
-	v Verifier
+	v   Verifier
 }
 
-func NewMidelware(ctx context.Context, v Verifier) *Midleware{
-	return &Midleware{
-		ctx:ctx,
-		v:v,
+func NewMidelware(ctx context.Context, v Verifier) *Midlewares {
+	return &Midlewares{
+		ctx: ctx,
+		v:   v,
 	}
 }

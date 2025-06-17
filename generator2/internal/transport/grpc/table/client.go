@@ -17,7 +17,7 @@ type Client struct{
 	client tablepb.TableServiceClient
 }
 
-func NewClient() *Client {
+func New() *Client {
 	return &Client{}
 }
 
