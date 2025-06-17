@@ -7,8 +7,8 @@ import (
 )
 
 type Midlewarer interface{
-	InitLogger() mux.MiddlewareFunc
-	CheckAuth() mux.MiddlewareFunc
+	InitLoggerCtx() mux.MiddlewareFunc
+	CheckAuth(cookieName string) mux.MiddlewareFunc
 }
 
 type Handlerer interface{
@@ -23,8 +23,8 @@ type Server struct {
 
 func New(cfg *Config, m Midlewarer, h Handlerer) *Server {
 	mux := mux.NewRouter()
-	mux.Use(m.InitLogger())
-	mux.Use(m.CheckAuth())
+	mux.Use(m.InitLoggerCtx())
+	mux.Use(m.CheckAuth(cfg.AuthCookieName))
 	mux.Handle("/upload", h.UploadTemplate()).Methods(http.MethodPost)
 	mux.Handle("/template/{institution_id}", h.DeleteTemplate()).Methods(http.MethodDelete)
 	mux.Handle("/", h.GetAllTemplates()).Methods(http.MethodGet)

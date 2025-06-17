@@ -52,6 +52,7 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${AUTH_HTTP_PORT}
       - ${AUTH_GRPC_PORT}
@@ -80,6 +81,7 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${FORMS_HTTP_PORT}
       - ${FORMS_TABLE_GRPC_PORT}
@@ -103,6 +105,7 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       PG_DB_NAME: ${PG_DB_NAME}
       PG_SSL: ${PG_SSL}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${GEN_HTTP_PORT}
 

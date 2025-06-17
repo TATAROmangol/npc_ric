@@ -59,7 +59,7 @@ func (m *Middlewares) OperationMiddleware() func(h http.Handler) http.Handler {
 	}
 }
 
-func (m *Middlewares) AuthMiddleware() func(h http.Handler) http.Handler {
+func (m *Middlewares) AuthMiddleware(cookieName string) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			cookie, err := r.Cookie("admin_token")
