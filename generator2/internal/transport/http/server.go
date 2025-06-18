@@ -16,7 +16,7 @@ type Midlewarer interface{
 type Handlerer interface{
 	UploadTemplate() http.Handler
 	DeleteTemplate() http.Handler
-	GetAllTemplates() http.Handler
+	GenerateTemplate() http.Handler
 }
 
 type Server struct {
@@ -31,7 +31,8 @@ func New(cfg *Config, m Midlewarer, h Handlerer) *Server {
 	mux.Use(m.CheckAuth(cfg.AuthCookieName))
 	mux.Handle("/upload", h.UploadTemplate()).Methods(http.MethodPost)
 	mux.Handle("/template/{institution_id}", h.DeleteTemplate()).Methods(http.MethodDelete)
-	mux.Handle("/", h.GetAllTemplates()).Methods(http.MethodGet)
+	mux.Handle("/generate", h.GenerateTemplate()).Methods(http.MethodPost)
+
 	return &Server{
 		srv: &http.Server{
 			Addr:    cfg.Host,

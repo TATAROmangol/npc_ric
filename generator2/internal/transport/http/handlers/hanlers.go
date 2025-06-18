@@ -2,8 +2,8 @@ package handlers
 
 type Srv interface {
 	DeleteTemplate(id int) error
-	GetAllTemplates() error
 	UploadTemplate(id int) error
+	GenerateTemplate(id int) error
 }
 
 type Handlers struct{
