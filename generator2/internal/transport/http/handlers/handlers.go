@@ -15,6 +15,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//go:generate mockgen -source=handlers.go -destination=./mocks/mock_handlers.go -package=handlers
+
 type Srv interface {
 	DeleteTemplate(id int) error
 	UploadTemplate(id int, file multipart.File) error
@@ -121,6 +123,13 @@ func (h *Handlers) GenerateTemplate() http.Handler {
 
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", doc.Name()))
     	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+		if _, err := doc.Stat(); err != nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed get stat file", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("failed get stat file" + err.Error()))
+			return
+		}
 
 		if _, err := io.Copy(w, bufio.NewReader(doc)); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed return for download file", err)
