@@ -3,8 +3,10 @@ module generator
 go 1.24.0
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
+	github.com/joho/godotenv v1.5.1
 	github.com/segmentio/kafka-go v0.4.48
 	google.golang.org/grpc v1.73.0
 	google.golang.org/protobuf v1.36.6
