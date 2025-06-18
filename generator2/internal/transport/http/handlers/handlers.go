@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"generator/pkg/logger"
@@ -15,12 +16,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//go:generate mockgen -source=handlers.go -destination=./mocks/mock_handlers.go -package=handlers
+//go:generate mockgen -source=handlers.go -destination=./mocks/mock_handlers.go -package=mocks
 
 type Srv interface {
-	DeleteTemplate(id int) error
-	UploadTemplate(id int, file multipart.File) error
-	GenerateTemplate(id int) (*os.File ,error)
+	DeleteTemplate(ctx context.Context, id int) error
+	UploadTemplate(ctx context.Context, id int, file multipart.File) error
+	GenerateTemplate(ctx context.Context, id int) (*os.File ,error)
 }
 
 type Handlers struct{
@@ -45,7 +46,7 @@ func (h *Handlers) DeleteTemplate() http.Handler {
 			return
 		}
 
-		if err := h.srv.DeleteTemplate(id); err != nil {
+		if err := h.srv.DeleteTemplate(r.Context(), id); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to delete template", err)
 			http.Error(w, "failed to delete template", http.StatusInternalServerError)
 			return
@@ -90,7 +91,7 @@ func (h *Handlers) UploadTemplate() http.Handler {
 			return
 		}
 
-		if err := h.srv.UploadTemplate(institutionId, file); err != nil {
+		if err := h.srv.UploadTemplate(r.Context(), institutionId, file); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to upload file", err)
 			http.Error(w, "Failed to upload file: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -113,7 +114,7 @@ func (h *Handlers) GenerateTemplate() http.Handler {
 			return
 		}
 
-		doc, err := h.srv.GenerateTemplate(req.InstitutionId)
+		doc, err := h.srv.GenerateTemplate(r.Context(), req.InstitutionId)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))

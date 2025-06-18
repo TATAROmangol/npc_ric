@@ -36,7 +36,7 @@ func TestHandlers_DeleteTemplate(t *testing.T) {
 			name: "successful deletion",
 			id:   "123",
 			mockBehavior: func() {
-				srv.EXPECT().DeleteTemplate(123).Return(nil)
+				srv.EXPECT().DeleteTemplate(gomock.Any(),123).Return(nil)
 			},
 			wantStatus: http.StatusAccepted,
 		},
@@ -53,7 +53,7 @@ func TestHandlers_DeleteTemplate(t *testing.T) {
 			name: "service error",
 			id:   "123",
 			mockBehavior: func() {
-				srv.EXPECT().DeleteTemplate(123).Return(errors.New("service error"))
+				srv.EXPECT().DeleteTemplate(gomock.Any(), 123).Return(errors.New("service error"))
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   "failed to delete template",
@@ -112,7 +112,7 @@ func TestHandlers_UploadTemplate(t *testing.T) {
 			fileContent:   "test content",
 			fileName:      "test.docx",
 			mockBehavior: func() {
-				srv.EXPECT().UploadTemplate(123, gomock.Any()).Return(nil)
+				srv.EXPECT().UploadTemplate(gomock.Any(), 123, gomock.Any()).Return(nil)
 			},
 			wantStatus: http.StatusAccepted,
 		},
@@ -145,7 +145,7 @@ func TestHandlers_UploadTemplate(t *testing.T) {
 			fileContent:   "test content",
 			fileName:      "test.docx",
 			mockBehavior: func() {
-				srv.EXPECT().UploadTemplate(123, gomock.Any()).Return(errors.New("service error"))
+				srv.EXPECT().UploadTemplate(gomock.Any(), 123, gomock.Any()).Return(errors.New("service error"))
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   "Failed to upload file",
@@ -217,7 +217,7 @@ func TestHandlers_GenerateTemplate(t *testing.T) {
 				file, _ := os.CreateTemp("", "test*.docx")
 				_, _ = file.WriteString("test content")
 				_, _ = file.Seek(0, 0)
-				srv.EXPECT().GenerateTemplate(123).Return(file, nil)
+				srv.EXPECT().GenerateTemplate(gomock.Any(), 123).Return(file, nil)
 			},
 			wantStatus: http.StatusOK,
 			wantHeaders: map[string]string{
@@ -240,7 +240,7 @@ func TestHandlers_GenerateTemplate(t *testing.T) {
 				"institution_id": 123,
 			},
 			mockBehavior: func() {
-				srv.EXPECT().GenerateTemplate(123).Return(nil, errors.New("service error"))
+				srv.EXPECT().GenerateTemplate(gomock.Any(), 123).Return(nil, errors.New("service error"))
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   "service error",
@@ -253,7 +253,7 @@ func TestHandlers_GenerateTemplate(t *testing.T) {
 			mockBehavior: func() {
 				file, _ := os.CreateTemp("", "test*.docx")
 				file.Close() 
-				srv.EXPECT().GenerateTemplate(123).Return(file, nil)
+				srv.EXPECT().GenerateTemplate(gomock.Any(), 123).Return(file, nil)
 			},
 			wantStatus: http.StatusInternalServerError,
 			wantBody:   "failed get stat file",
