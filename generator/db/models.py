@@ -4,6 +4,7 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
+# Модель шаблона документа  
 class Template(Base):
     __tablename__ = "templates"
     id = Column(Integer, primary_key=True)
@@ -12,6 +13,7 @@ class Template(Base):
     institution_id = Column(Integer, unique=True)
 
 
+# Модель сгенерированного документа
 class GeneratedDocument(Base):
     __tablename__ = "generated_docs"
     id = Column(Integer, primary_key=True)
