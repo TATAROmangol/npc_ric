@@ -21,7 +21,7 @@ import (
 type Srv interface {
 	DeleteTemplate(ctx context.Context, id int) error
 	UploadTemplate(ctx context.Context, id int, file multipart.File) error
-	GenerateTemplate(ctx context.Context, id int) (*os.File ,error)
+	GenerateTemplate(ctx context.Context, id int) (*os.File, func(), error)
 }
 
 type Handlers struct{
@@ -114,13 +114,14 @@ func (h *Handlers) GenerateTemplate() http.Handler {
 			return
 		}
 
-		doc, err := h.srv.GenerateTemplate(r.Context(), req.InstitutionId)
+		doc, remove, err := h.srv.GenerateTemplate(r.Context(), req.InstitutionId)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
 		defer doc.Close()
+		defer remove()
 
 		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", doc.Name()))
     	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
@@ -131,6 +132,7 @@ func (h *Handlers) GenerateTemplate() http.Handler {
 			w.Write([]byte("failed get stat file" + err.Error()))
 			return
 		}
+		doc.Seek(0, 0)
 
 		if _, err := io.Copy(w, bufio.NewReader(doc)); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed return for download file", err)

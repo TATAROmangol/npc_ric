@@ -51,12 +51,13 @@ func (mr *MockSrvMockRecorder) DeleteTemplate(ctx, id interface{}) *gomock.Call 
 }
 
 // GenerateTemplate mocks base method.
-func (m *MockSrv) GenerateTemplate(ctx context.Context, id int) (*os.File, error) {
+func (m *MockSrv) GenerateTemplate(ctx context.Context, id int) (*os.File, func(), error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateTemplate", ctx, id)
 	ret0, _ := ret[0].(*os.File)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(func())
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // GenerateTemplate indicates an expected call of GenerateTemplate.
