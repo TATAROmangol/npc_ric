@@ -1,3 +1,4 @@
+// Объект для хранения данных о вузах и их формах
 let universitiesData = {};
 
 // DOM элементы
@@ -7,144 +8,195 @@ const formFieldsContainer = document.getElementById('form-fields-container');
 const submitBtn = document.getElementById('submit-btn');
 const dynamicForm = document.getElementById('dynamic-form');
 
-// Загрузка университетов
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await Promise.all([
+            loadUniversities(),
+            loadSupervisors()
+        ]);
+        
+        // Инициализация Flatpickr для полей даты
+        initDatePickers();
+        
+        // Добавляем обработчики событий
+        setupEventListeners();
+        
+    } catch (error) {
+        console.error('Ошибка инициализации:', error);
+        showCustomAlert('Произошла ошибка при загрузке данных');
+    }
+});
+
+// Загрузка списка университетов
 async function loadUniversities() {
     try {
         const response = await fetch('/forms/api/get/institutions');
-        if (!response.ok) throw new Error('Ошибка загрузки университетов');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
-
-        universitiesData = {};
-        data.forEach(university => {
-            universitiesData[university.name] = {
+        
+        // Формируем структуру данных
+        universitiesData = data.reduce((acc, university) => {
+            acc[university.name] = {
                 id: university.id,
-                fields: [] // загружаем позже
+                fields: [] 
             };
-        });
+            return acc;
+        }, {});
 
-        populateUniversitySelect();
+        // Заполняем выпадающий список
+        populateSelect(universitySelect, Object.keys(universitiesData), 'Выберите учебное заведение');
+        
     } catch (error) {
-        console.error('Ошибка при загрузке учебных заведений:', error);
-        showCustomAlert('Не удалось загрузить список учебных заведений');
+        console.error('Ошибка загрузки университетов:', error);
+        throw error;
     }
 }
 
-// Заполнение списка университетов
-function populateUniversitySelect() {
-    universitySelect.innerHTML = '';
-
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Выберите учебное заведение';
-    defaultOption.selected = true;
-    defaultOption.disabled = true;
-    universitySelect.appendChild(defaultOption);
-
-    Object.keys(universitiesData).forEach(name => {
-        const option = document.createElement('option');
-        option.value = name;
-        option.textContent = name;
-        universitySelect.appendChild(option);
-    });
-}
-
-// Заполнение списка руководителей
-async function populateSupervisorSelect() {
-    supervisorSelect.innerHTML = '';
-
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = 'Выберите руководителя';
-    defaultOption.selected = true;
-    defaultOption.disabled = true;
-    supervisorSelect.appendChild(defaultOption);
-
+// Загрузка списка руководителей
+async function loadSupervisors() {
     try {
         const response = await fetch('/forms/api/get/mentors');
         if (!response.ok) {
-            throw new Error('Ошибка загрузки руководителей');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const mentors = await response.json();
-
-        mentors.forEach(mentor => {
-            const option = document.createElement('option');
-            option.value = mentor.name;
-            option.textContent = mentor.name;
-            supervisorSelect.appendChild(option);
-        });
+        const mentorNames = mentors.map(mentor => mentor.name);
+        
+        populateSelect(supervisorSelect, mentorNames, 'Выберите руководителя');
+        
     } catch (error) {
-        console.error('Ошибка при загрузке руководителей:', error);
-        showCustomAlert('Не удалось загрузить список руководителей');
+        console.error('Ошибка загрузки руководителей:', error);
+        throw error;
     }
 }
 
-// Обработка смены университета
-universitySelect.addEventListener('change', async function () {
-    const selectedUniversity = this.value;
-    formFieldsContainer.innerHTML = '';
-    submitBtn.classList.add('hidden');
+// Универсальная функция заполнения select элемента
+function populateSelect(selectElement, options, placeholderText) {
+    selectElement.innerHTML = '';
+    
+    // Добавляем placeholder
+    const placeholderOption = document.createElement('option');
+    placeholderOption.value = '';
+    placeholderOption.textContent = placeholderText;
+    placeholderOption.selected = true;
+    placeholderOption.disabled = true;
+    selectElement.appendChild(placeholderOption);
+    
+    // Добавляем варианты выбора
+    options.forEach(option => {
+        const optionElement = document.createElement('option');
+        optionElement.value = option;
+        optionElement.textContent = option;
+        selectElement.appendChild(optionElement);
+    });
+}
 
-    if (selectedUniversity && universitiesData[selectedUniversity]) {
-        if (universitiesData[selectedUniversity].fields.length === 0) {
+// Настройка обработчиков событий
+function setupEventListeners() {
+    // Обработчик изменения выбранного университета
+    universitySelect.addEventListener('change', async function() {
+        const selectedUniName = this.value;
+
+        resetForm();
+        
+        if (selectedUniName && universitiesData[selectedUniName]) {
             try {
-                const response = await fetch('/forms/api/get/form/columns', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        institution_id: universitiesData[selectedUniversity].id
-                    })
-                });
-
-                if (!response.ok) throw new Error('Ошибка загрузки полей формы');
-                const fields = await response.json();
-
-                const parsedFields = Array.isArray(fields)
-                    ? fields.map(name => ({
-                        name: name.toLowerCase().replace(/\s+/g, '_'),
-                        label: name,
-                        type: 'text',
-                        required: false
-                    }))
-                    : fields;
-
-                universitiesData[selectedUniversity].fields = parsedFields;
+                // Загружаем поля формы, если еще не загружены
+                if (universitiesData[selectedUniName].fields.length === 0) {
+                    await loadFormFields(selectedUniName);
+                }
+                
+                // Создаем поля формы
+                createFormFields(universitiesData[selectedUniName].fields);
+                submitBtn.classList.remove('hidden');
+                
             } catch (error) {
-                console.error('Ошибка при загрузке полей формы:', error);
+                console.error('Ошибка загрузки полей формы:', error);
                 showCustomAlert('Не удалось загрузить поля формы');
-                return;
             }
         }
+    });
+    
+    // Обработчик отправки формы
+    dynamicForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        try {
+            const isValid = await validateAndSubmitForm();
+            if (isValid) {
+                resetForm();
+            }
+        } catch (error) {
+            console.error('Ошибка отправки формы:', error);
+            showCustomAlert(`Ошибка: ${error.message}`);
+        }
+    });
 
-        createFormFields(universitiesData[selectedUniversity].fields);
-        submitBtn.classList.remove('hidden');
+    formFieldsContainer.addEventListener('input', clearFieldError);
+}
+
+// Загрузка полей формы для выбранного университета
+async function loadFormFields(universityName) {
+    try {
+        const universityId = universitiesData[universityName].id;
+        
+        const response = await fetch('/forms/api/get/form/columns', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ institution_id: universityId })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const fields = await response.json();
+        
+        // Нормализуем данные полей
+        universitiesData[universityName].fields = Array.isArray(fields)
+            ? fields.map(field => ({
+                name: field.toLowerCase().replace(/\s+/g, '_'),
+                label: field,
+                type: 'text',
+                required: true
+            }))
+            : fields;
+            
+    } catch (error) {
+        console.error('Ошибка загрузки полей формы:', error);
+        throw error;
     }
-});
+}
 
 // Создание полей формы
 function createFormFields(fieldsConfig) {
     formFieldsContainer.innerHTML = '';
-
+    
     fieldsConfig.forEach(field => {
         const fieldGroup = document.createElement('div');
         fieldGroup.className = 'form-group';
-
+        
+        // Создаем label
         const label = document.createElement('label');
         label.htmlFor = field.name;
         label.textContent = field.label;
-
-        let input;
         
+        // Создаем input/select в зависимости от типа
+        let input;
         if (field.type === 'select') {
             input = document.createElement('select');
             input.id = field.name;
             input.name = field.name;
-            input.required = true; 
             input.className = 'form-control';
             
+            // Добавляем опции, если они есть
             if (field.options) {
                 field.options.forEach(option => {
                     const optionElement = document.createElement('option');
@@ -158,30 +210,114 @@ function createFormFields(fieldsConfig) {
             input.id = field.name;
             input.name = field.name;
             input.type = field.type || 'text';
-            input.required = true; // Всегда required
             input.className = 'form-control';
+            
+            // Особые классы для специальных типов
+            if (input.type === 'date') {
+                input.classList.add('datepicker');
+            }
         }
-
-        if (input.type === 'date') {
-            input.classList.add('datepicker');
-        }
-
+        
         fieldGroup.appendChild(label);
         fieldGroup.appendChild(input);
         formFieldsContainer.appendChild(fieldGroup);
     });
+    
+    // Инициализируем datepicker для полей даты
+    initDatePickers();
+}
 
+// Инициализация Flatpickr для полей даты
+function initDatePickers() {
     document.querySelectorAll('.datepicker').forEach(el => {
         flatpickr(el, {
             dateFormat: "d.m.Y",
-            locale: "ru"
+            locale: "ru",
+            allowInput: true
         });
     });
 }
 
+// Валидация и отправка формы
+async function validateAndSubmitForm() {
+    const selectedUniName = universitySelect.value;
+    
+    if (!selectedUniName) {
+        showCustomAlert('Выберите учебное заведение');
+        return false;
+    }
+    
+    if (!supervisorSelect.value) {
+        markFieldAsInvalid(supervisorSelect, 'Выберите руководителя');
+        return false;
+    }
+    
+    const university = universitiesData[selectedUniName];
+    let isValid = true;
+    
+    // Проверяем все обязательные поля
+    university.fields.forEach(field => {
+        const input = document.getElementById(field.name);
+        const value = input.value.trim();
+        
+        if (field.required && !value) {
+            markFieldAsInvalid(input, 'Это поле обязательно для заполнения');
+            isValid = false;
+        } else if (value && !validateFieldValue(value, field.type)) {
+            markFieldAsInvalid(input, getValidationMessage(field.type));
+            isValid = false;
+        }
+    });
+    
+    if (!isValid) {
+        showCustomAlert('Пожалуйста, заполните все обязательные поля корректно');
+        return false;
+    }
+    
+    // Формируем данные для отправки
+    const formData = {
+        institution_id: university.id,
+        supervisor: supervisorSelect.value,
+        fields: university.fields.map(field => ({
+            name: field.name,
+            value: document.getElementById(field.name).value.trim()
+        }))
+    };
+    
+    // Отправляем данные
+    try {
+        const token = localStorage.getItem('authToken');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch('/forms/api/post/form', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(formData)
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Ошибка сервера');
+        }
+        
+        showCustomAlert('Форма успешно отправлена!');
+        return true;
+        
+    } catch (error) {
+        console.error('Ошибка отправки формы:', error);
+        throw error;
+    }
+}
+
 // Валидация значения поля по типу
 function validateFieldValue(value, type) {
-    if (!value) return true; 
+    if (!value) return true;
     
     switch (type) {
         case 'number':
@@ -191,92 +327,12 @@ function validateFieldValue(value, type) {
         case 'date':
             return /^\d{2}\.\d{2}\.\d{4}$/.test(value);
         default:
-            return true; 
+            return true;
     }
 }
 
-function checkRequiredFields(fieldsConfig) {
-    let allRequiredFilled = true;
-    
-    fieldsConfig.forEach(field => {
-        if (field.required) {
-            const input = document.getElementById(field.name);
-            const value = input.value.trim();
-            
-            if (!value) {
-                input.classList.add('error');
-                
-                let errorElement = input.nextElementSibling;
-                if (!errorElement || !errorElement.classList.contains('error-message')) {
-                    errorElement = document.createElement('div');
-                    errorElement.className = 'error-message';
-                    errorElement.textContent = 'Это поле обязательно для заполнения';
-                    input.parentNode.insertBefore(errorElement, input.nextSibling);
-                }
-                
-                allRequiredFilled = false;
-            } else {
-                input.classList.remove('error');
-                const errorElement = input.nextElementSibling;
-                if (errorElement && errorElement.classList.contains('error-message')) {
-                    errorElement.remove();
-                }
-            }
-        }
-    });
-    
-    return allRequiredFilled;
-}
-
-// Валидация всей формы перед отправкой
-function validateForm(fieldsConfig) {
-    let isValid = true;
-    
-    // Проверка выбора руководителя
-    if (!supervisorSelect.value) {
-        supervisorSelect.classList.add('error');
-        const errorElement = supervisorSelect.nextElementSibling;
-        if (!errorElement || !errorElement.classList.contains('error-message')) {
-            const errorMsg = document.createElement('div');
-            errorMsg.className = 'error-message';
-            errorMsg.textContent = 'Выберите руководителя';
-            supervisorSelect.parentNode.insertBefore(errorMsg, supervisorSelect.nextSibling);
-        }
-        isValid = false;
-    } else {
-        supervisorSelect.classList.remove('error');
-        const errorElement = supervisorSelect.nextElementSibling;
-        if (errorElement && errorElement.classList.contains('error-message')) {
-            errorElement.remove();
-        }
-    }
-    
-    fieldsConfig.forEach(field => {
-        const input = document.getElementById(field.name);
-        const value = input.value.trim();
-        
-        // Для обязательных полей проверка уже была, проверяем только заполненные
-        if (value) {
-            if (!validateFieldValue(value, field.type)) {
-                input.classList.add('error');
-                isValid = false;
-                
-                let errorElement = input.nextElementSibling;
-                if (!errorElement || !errorElement.classList.contains('error-message')) {
-                    errorElement = document.createElement('div');
-                    errorElement.className = 'error-message';
-                    input.parentNode.insertBefore(errorElement, input.nextSibling);
-                }
-                
-                errorElement.textContent = getValidationErrorMessage(field.type);
-            }
-        }
-    });
-    
-    return isValid;
-}
-
-function getValidationErrorMessage(type) {
+// Получение сообщения об ошибке для типа поля
+function getValidationMessage(type) {
     switch (type) {
         case 'number': return 'Введите корректное число';
         case 'email': return 'Введите корректный email';
@@ -285,83 +341,54 @@ function getValidationErrorMessage(type) {
     }
 }
 
-// Отправка формы
-dynamicForm.addEventListener('submit', async function (e) {
-    e.preventDefault(); 
-
-    const selectedUniversity = universitySelect.value;
-
-    const university = universitiesData[selectedUniversity];
-
-    const isFormValid = validateForm(university.fields);
-    if (!isFormValid) {
-        showCustomAlert('Пожалуйста, исправьте ошибки в форме перед отправкой');
-        return;
+// Помечаем поле как невалидное
+function markFieldAsInvalid(element, message) {
+    element.classList.add('invalid');
+    
+    let errorElement = element.nextElementSibling;
+    if (!errorElement || !errorElement.classList.contains('error-message')) {
+        errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        element.parentNode.insertBefore(errorElement, element.nextSibling);
     }
-
-    const infoArray = university.fields.map(field => {
-        return document.getElementById(field.name).value;
-    });
-
-    const formData = {
-        institution_id: university.id,
-        info: infoArray
-    };
-
-    // Отправка данных
-    try {
-        const token = localStorage.getItem('authToken');
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch('/forms/api/post/form', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(formData)
-        });
-
-        if (!response.ok) {
-            throw new Error(await response.text() || 'Ошибка отправки формы');
-        }
-
-        showCustomAlert('Заявление успешно отправлено!');
-        dynamicForm.reset();
-        formFieldsContainer.innerHTML = '';
-        submitBtn.classList.add('hidden');
-        universitySelect.value = '';
-        
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showCustomAlert('Ошибка при отправке формы: ' + error.message);
-    }
-});
-
-function showCustomAlert(message) {
-    document.getElementById('customAlertMessage').textContent = message;
-    document.getElementById('customAlert').style.display = 'block';
-    document.getElementById('customAlertOverlay').style.display = 'block';
+    
+    errorElement.textContent = message;
 }
 
-function hideCustomAlert() {
-    document.getElementById('customAlert').style.display = 'none';
-    document.getElementById('customAlertOverlay').style.display = 'none';
-}
-
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    loadUniversities();
-    populateSupervisorSelect();
-});
-
-// Добавляем обработчики для сброса ошибок при вводе
-formFieldsContainer.addEventListener('input', (e) => {
+// Очищаем ошибку поля
+function clearFieldError(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
-        e.target.classList.remove('error');
+        e.target.classList.remove('invalid');
+        
         const errorElement = e.target.nextElementSibling;
         if (errorElement && errorElement.classList.contains('error-message')) {
             errorElement.remove();
         }
     }
-});
+}
+
+// Сброс формы
+function resetForm() {
+    formFieldsContainer.innerHTML = '';
+    submitBtn.classList.add('hidden');
+    universitySelect.classList.remove('invalid');
+    
+    const errorElement = supervisorSelect.nextElementSibling;
+    if (errorElement && errorElement.classList.contains('error-message')) {
+        errorElement.remove();
+    }
+}
+
+// Функции для показа/скрытия кастомных уведомлений
+function showCustomAlert(message) {
+    const alertElement = document.getElementById('customAlert');
+    const messageElement = document.getElementById('customAlertMessage');
+    
+    messageElement.textContent = message;
+    alertElement.style.display = 'block';
+    
+    // Автоматическое скрытие через 5 секунд
+    setTimeout(() => {
+        alertElement.style.display = 'none';
+    }, 5000);
+}
