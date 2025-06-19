@@ -1,6 +1,7 @@
 package config
 
 import (
+	"generator/internal/docx"
 	"generator/internal/transport/grpc/table"
 	"generator/internal/transport/grpc/verify"
 	"generator/internal/transport/httpvo1"
@@ -18,6 +19,7 @@ type Config struct{
 	HTTP httpvo1.Config
 	Kafka kafka.Config
 	Mongo mongodb.Config
+	Docx docx.Config
 }
 
 func MustLoad() *Config {

@@ -7,7 +7,6 @@ package mocks
 import (
 	context "context"
 	multipart "mime/multipart"
-	os "os"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -51,10 +50,10 @@ func (mr *MockSrvMockRecorder) DeleteTemplate(ctx, id interface{}) *gomock.Call 
 }
 
 // GenerateTemplate mocks base method.
-func (m *MockSrv) GenerateTemplate(ctx context.Context, id int) (*os.File, func(), error) {
+func (m *MockSrv) GenerateTemplate(ctx context.Context, id int) ([]byte, func(), error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GenerateTemplate", ctx, id)
-	ret0, _ := ret[0].(*os.File)
+	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(func())
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

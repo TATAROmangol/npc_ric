@@ -7,6 +7,11 @@ import (
 	"generator/pkg/logger"
 	"mime/multipart"
 	"os"
+	"time"
+)
+
+const(
+	Dir = "./temp"
 )
 
 type Repo interface{
@@ -16,7 +21,7 @@ type Repo interface{
 }
 
 type Generatorer interface{
-	Generate(ctx context.Context, data []byte, table entity.Table) ([]byte, error)
+	Generate(data []byte, table entity.Table, path string) error 
 }
 
 type Tabler interface{
@@ -52,7 +57,7 @@ func (s *Service) UploadTemplate(ctx context.Context, id int, file multipart.Fil
 	return s.repo.UploadTemplate(ctx, id, data)
 }
 
-func (s *Service) GenerateTemplate(ctx context.Context, id int) (*os.File, func(), error){
+func (s *Service) GenerateTemplate(ctx context.Context, id int) ([]byte, func(), error){
 	data, err := s.repo.GetTemplate(ctx, id)
 	if err != nil{
 		return nil, func() {}, err
@@ -63,24 +68,31 @@ func (s *Service) GenerateTemplate(ctx context.Context, id int) (*os.File, func(
 		return nil, func() {}, err
 	}
 
-	rdata, err := s.generator.Generate(ctx, data, table)
+	path := fmt.Sprintf("%s/%v.docx", Dir, id)
+	err = s.generator.Generate(data, table, path)
 	if err != nil{
 		return nil, func() {}, err
 	}
 
-	file, err := os.CreateTemp("../../temp", fmt.Sprintf("%v.docx", id))
-	if err != nil {
-		logger.GetFromCtx(ctx).ErrorContext(ctx, "failed to create temp file", err)
+	file, err := os.ReadFile(path)
+	if err != nil{
+		logger.GetFromCtx(ctx).ErrorContext(ctx, "failed to read file", err)
 		return nil, func() {}, err
 	}
-	file.Write(rdata)
 
-	remove := func() {
-		file.Close()
-		err := os.Remove(file.Name())
-		if err != nil{
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancel()
+
+	go func() {
+		<-ctx.Done()
+		
+		if err := os.Remove(path); err != nil {
 			logger.GetFromCtx(ctx).ErrorContext(ctx, "failed to remove file", err)
 		}
+	}()
+
+	remove := func() {
+		cancel() 
 	}
 
 	return file, remove, nil

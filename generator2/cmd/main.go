@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"generator/internal/config"
-	"generator/internal/domain"
+	"generator/internal/docx"
 	"generator/internal/service"
 	"generator/internal/storage"
 	"generator/internal/transport/grpc/table"
@@ -42,7 +42,11 @@ func main() {
 
 	repo := storage.NewStorage(db.DB)
 
-	generator := domain.NewGenerator()
+	generator, err := docx.NewGenerator(cfg.Docx)
+	if err != nil {
+		l.ErrorContext(ctx, "failed to create docx generator", err)
+		os.Exit(1)
+	}
 
 	tabler := table.New(cfg.GRPCTable)
 	l.InfoContext(ctx, "Connected to gRPC table service", "addr", cfg.GRPCTable.Addr())
