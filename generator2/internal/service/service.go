@@ -12,7 +12,7 @@ import (
 type Repo interface{
 	DeleteTemplate(ctx context.Context, id int) error
 	UploadTemplate(ctx context.Context, id int, data []byte) error
-	GenerateTemplate(ctx context.Context, id int) ([]byte ,error)
+	GetTemplate(ctx context.Context, id int) ([]byte ,error)
 }
 
 type Generatorer interface{
@@ -45,7 +45,7 @@ func (s *Service) UploadTemplate(ctx context.Context, id int, file multipart.Fil
 }
 
 func (s *Service) GenerateTemplate(ctx context.Context, id int) (*os.File, func(), error){
-	data, err := s.repo.GenerateTemplate(ctx, id)
+	data, err := s.repo.GetTemplate(ctx, id)
 	if err != nil{
 		return nil, func() {}, err
 	}
