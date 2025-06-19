@@ -17,8 +17,8 @@ type Client struct{
 	client tablepb.TableServiceClient
 }
 
-func New() *Client {
-	return &Client{}
+func New(cfg Config) *Client {
+	return &Client{cfg: cfg}
 }
 
 func (c *Client) connect(ctx context.Context) error{

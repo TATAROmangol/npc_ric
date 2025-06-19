@@ -15,12 +15,14 @@ type Verifier interface {
 
 type Midlewares struct {
 	ctx context.Context
+	authCookieName string
 	v   Verifier
 }
 
-func NewMidelware(ctx context.Context, v Verifier) *Midlewares {
+func NewMidelware(ctx context.Context, authCookieName string, v Verifier) *Midlewares {
 	return &Midlewares{
 		ctx: ctx,
+		authCookieName: authCookieName,
 		v:   v,
 	}
 }
@@ -35,7 +37,7 @@ func (m *Midlewares) InitLoggerCtx() mux.MiddlewareFunc {
 	}
 }
 
-func (m *Midlewares) InitJsonContentType() func(h http.Handler) http.Handler {
+func (m *Midlewares) InitJsonContentType() mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
@@ -44,7 +46,7 @@ func (m *Midlewares) InitJsonContentType() func(h http.Handler) http.Handler {
 	}
 }
 
-func (m *Midlewares) Operation() func(h http.Handler) http.Handler {
+func (m *Midlewares) Operation() mux.MiddlewareFunc {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			operationId := uuid.NewString()
@@ -63,7 +65,7 @@ func (m *Midlewares) Operation() func(h http.Handler) http.Handler {
 func (m *Midlewares) CheckAuth(cookieName string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("admin_token")
+			cookie, err := r.Cookie(m.authCookieName)
 			if err != nil || cookie == nil {
 				logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "cookie not found", err)
 				http.Error(w, "cookie not found", http.StatusUnauthorized)

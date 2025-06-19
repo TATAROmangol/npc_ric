@@ -29,6 +29,14 @@ type Service struct{
 	tabler Tabler
 }
 
+func New(repo Repo, generator Generatorer, tabler Tabler) *Service{
+	return &Service{
+		repo: repo,
+		generator: generator,
+		tabler: tabler,
+	}
+}
+
 func (s *Service) DeleteTemplate(ctx context.Context, id int) error{
 	return s.repo.DeleteTemplate(ctx, id)
 }

@@ -3,7 +3,7 @@ package config
 import (
 	"generator/internal/transport/grpc/table"
 	"generator/internal/transport/grpc/verify"
-	"generator/internal/transport/http"
+	"generator/internal/transport/httpvo1"
 	"generator/pkg/kafka"
 	"generator/pkg/mongodb"
 	"log"
@@ -15,8 +15,8 @@ import (
 type Config struct{
 	GRPCTable table.Config
 	GRPCAuth verify.Config
-	HTTP http.Config
-	Kafkfa kafka.Config
+	HTTP httpvo1.Config
+	Kafka kafka.Config
 	Mongo mongodb.Config
 }
 

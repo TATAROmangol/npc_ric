@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"generator/internal/transport/http/handlers/mocks"
+	"generator/internal/transport/httpvo1/handlers/mocks"
 	"generator/pkg/logger"
 	"mime/multipart"
 	"net/http"

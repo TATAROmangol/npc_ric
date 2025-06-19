@@ -1,4 +1,4 @@
-package http
+package httpvo1
 
 import (
 	"net/http"
@@ -23,7 +23,7 @@ type Server struct {
 	srv *http.Server
 }
 
-func New(cfg *Config, m Midlewarer, h Handlerer) *Server {
+func New(cfg Config, m Midlewarer, h Handlerer) *Server {
 	mux := mux.NewRouter()
 	mux.Use(m.InitLoggerCtx())
 	mux.Use(m.Operation())
