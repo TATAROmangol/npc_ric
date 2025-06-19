@@ -68,7 +68,7 @@ func (s *Service) GenerateTemplate(ctx context.Context, id int) (*os.File, func(
 		return nil, func() {}, err
 	}
 
-	file, err := os.CreateTemp("", fmt.Sprintf("%v.docx", id))
+	file, err := os.CreateTemp("../../temp", fmt.Sprintf("%v.docx", id))
 	if err != nil {
 		logger.GetFromCtx(ctx).ErrorContext(ctx, "failed to create temp file", err)
 		return nil, func() {}, err
