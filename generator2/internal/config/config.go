@@ -4,6 +4,8 @@ import (
 	"generator/internal/transport/grpc/table"
 	"generator/internal/transport/grpc/verify"
 	"generator/internal/transport/http"
+	"generator/pkg/kafka"
+	"generator/pkg/mongodb"
 	"log"
 
 	"github.com/caarlos0/env/v11"
@@ -14,6 +16,8 @@ type Config struct{
 	GRPCTable table.Config
 	GRPCAuth verify.Config
 	HTTP http.Config
+	Kafkfa kafka.Config
+	Mongo mongodb.Config
 }
 
 func MustLoad() *Config {
