@@ -6,8 +6,10 @@ import (
 	"generator/internal/entity"
 	"strings"
 
+	"github.com/unidoc/unioffice/color"
 	"github.com/unidoc/unioffice/common/license"
 	"github.com/unidoc/unioffice/document"
+	"github.com/unidoc/unioffice/schema/soo/wml"
 )
 
 type Generator struct{}
@@ -52,6 +54,9 @@ func (g *Generator) Generate(data []byte, table entity.Table, path string) error
 
 	p := doc.Paragraphs()[i]
 	tbl := doc.InsertTableAfter(p)
+
+	borders := tbl.Properties().Borders()
+	borders.SetAll(wml.ST_BorderSingle, color.Auto, 2)
 
 	clmn := tbl.AddRow()
 	for _, col := range table.Columns {
