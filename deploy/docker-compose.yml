@@ -121,6 +121,17 @@ services:
     depends_on:
       - kafka
 
+  mongodb:  
+    image: mongo:latest  
+    container_name: mongodb  
+    ports:
+      -  "${MONGO_PORT}:${MONGO_PORT}" 
+    volumes:  
+      - mongo_data:/data/db  
+    environment:  
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}  
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}  
+
   postgres:
     image: postgres:15-alpine
     container_name: postgres
