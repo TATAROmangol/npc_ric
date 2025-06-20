@@ -7,10 +7,10 @@ services:
         condition: service_started
       forms:
         condition: service_started
-      # generator:
-      #   condition: service_started
-      generator-go:
+      generator:
         condition: service_started
+      # generator-go:
+      #   condition: service_started
     environment:
       AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
       AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
@@ -87,28 +87,28 @@ services:
       - ${FORMS_HTTP_PORT}
       - ${FORMS_TABLE_GRPC_PORT}
 
-  # generator:
-  #   container_name: generator
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   build:
-  #     context: ../generator
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     FORMS_GRPC_HOST: nginx
-  #     FORMS_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
-  #     GEN_HTTP_PORT: ${GEN_HTTP_PORT}
-  #     GEN_HTTP_HOST: ${GEN_HTTP_HOST}
-  #     PG_HOST: postgres
-  #     PG_PORT: ${PG_PORT}
-  #     PG_USER: ${PG_USER}
-  #     PG_PASSWORD: ${PG_PASSWORD}
-  #     PG_DB_NAME: ${PG_DB_NAME}
-  #     PG_SSL: ${PG_SSL}
-  #     AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
-  #   expose:
-  #     - ${GEN_HTTP_PORT}
+  generator:
+    container_name: generator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    build:
+      context: ../generator
+      dockerfile: Dockerfile
+    environment:
+      FORMS_GRPC_HOST: nginx
+      FORMS_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
+      GEN_HTTP_PORT: ${GEN_HTTP_PORT}
+      GEN_HTTP_HOST: ${GEN_HTTP_HOST}
+      PG_HOST: postgres
+      PG_PORT: ${PG_PORT}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      PG_DB_NAME: ${PG_DB_NAME}
+      PG_SSL: ${PG_SSL}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
+    expose:
+      - ${GEN_HTTP_PORT}
 
   stats:
     container_name: stats
@@ -122,39 +122,39 @@ services:
     depends_on:
       - kafka
     
-  generator-go:
-    container_name: generator-go
-    depends_on:
-      mongodb:
-        condition: service_started
-      kafka:
-        condition: service_started
-    build:
-      context: ../generator2
-      dockerfile: Dockerfile
-    environment:
-      GENERATOR_HTTP_HOST: ${GEN_HTTP_HOST}
-      GENERATOR_HTTP_PORT: ${GEN_HTTP_PORT}
-      GENERATOR_TABLE_GRPC_HOST: nginx
-      GENERATOR_TABLE_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
-      GENERATOR_AUTH_GRPC_HOST: nginx
-      GENERATOR_AUTH_GRPC_PORT: ${NGINX_GRPC_AUTH_PORT}
-      MONGO_HOST: mongodb
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USER: ${MONGO_USER}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_DB_NAME: ${MONGO_DB_NAME}
-      MONGO_COLLECTION_NAME: ${MONGO_COLLECTION_NAME}
-      MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE}
-      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
-      DOCX_LICENSE_KEY: ${DOCX_LICENSE_KEY}
-      KAFKA_PORT: ${KAFKA_PORT}
-      KAFKA_HOST: kafka
-      KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
-    ports:
-      - "${GEN_HTTP_PORT}:${GEN_HTTP_PORT}"
-    expose:
-      - ${GEN_HTTP_PORT}
+  # generator-go:
+  #   container_name: generator-go
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_started
+  #     kafka:
+  #       condition: service_started
+  #   build:
+  #     context: ../generator2
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     GENERATOR_HTTP_HOST: ${GEN_HTTP_HOST}
+  #     GENERATOR_HTTP_PORT: ${GEN_HTTP_PORT}
+  #     GENERATOR_TABLE_GRPC_HOST: nginx
+  #     GENERATOR_TABLE_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
+  #     GENERATOR_AUTH_GRPC_HOST: nginx
+  #     GENERATOR_AUTH_GRPC_PORT: ${NGINX_GRPC_AUTH_PORT}
+  #     MONGO_HOST: mongodb
+  #     MONGO_PORT: ${MONGO_PORT}
+  #     MONGO_USER: ${MONGO_USER}
+  #     MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     MONGO_DB_NAME: ${MONGO_DB_NAME}
+  #     MONGO_COLLECTION_NAME: ${MONGO_COLLECTION_NAME}
+  #     MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE}
+  #     AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
+  #     DOCX_LICENSE_KEY: ${DOCX_LICENSE_KEY}
+  #     KAFKA_PORT: ${KAFKA_PORT}
+  #     KAFKA_HOST: kafka
+  #     KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+  #   ports:
+  #     - "${GEN_HTTP_PORT}:${GEN_HTTP_PORT}"
+  #   expose:
+  #     - ${GEN_HTTP_PORT}
 
   mongodb:  
     image: mongo:latest  
