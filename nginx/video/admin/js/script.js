@@ -587,12 +587,21 @@ generateDocBtn.addEventListener('click', async () => {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "Ошибка генерации документа.");
+            const errorData = await response.text();
+            throw new Error(errorData || "Ошибка генерации документа.");
         }
 
-        const result = await response.json();
-        window.open(`http://localhost:8082${result.download_url}`, "_blank");
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "generated.docx";
+        document.body.appendChild(a);
+        a.click();
+
+        a.remove();
+        window.URL.revokeObjectURL(url);
     } catch (error) {
         console.error("Ошибка генерации:", error);
         showCustomAlert("Ошибка генерации: " + error.message);
