@@ -1,3 +1,4 @@
+// Функция проверки авторизации
 async function checkAuth() {
     try {
         const response = await fetch('/admin/api/get/institutions', {
@@ -18,6 +19,7 @@ async function checkAuth() {
     }
 }
 
+// Класс для работы с API
 class ApiService {
     constructor() {
         this.adminBaseUrl = '/admin/api';
@@ -126,8 +128,6 @@ class ApiService {
         });
     }
 
-
-
     async updateFormColumns(institutionId, columns) {
         const id = Number(institutionId);
         if (isNaN(id)) throw new Error('ID учреждения должен быть числом');
@@ -143,7 +143,6 @@ class ApiService {
             })
         });
     }
-
 
     // Mentor methods
     async getMentors() {
@@ -181,14 +180,12 @@ class ApiService {
     }
 }
 
+// Создание экземпляра API сервиса
 const apiService = new ApiService("/admin/api/"); 
 
-let institutions = []
+// Глобальные переменные
+let institutions = [];
 let selectedInstitution = null;
-
-
-
-
 
 // DOM элементы
 const institutionsList = document.getElementById('institutionsList');
@@ -243,7 +240,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Загрузка списка вузов с сервера
+// Загрузка списка вузов
 async function loadInstitutions() {
     institutions = await apiService.getInstitutions();
     renderInstitutionsList();
@@ -319,14 +316,16 @@ async function addInstitution() {
         showCustomAlert(`Ошибка: ${error.message}`);
     }
 }
-
-// Функции для модального окна редактирования формы
+// Функции для редактирования форм
+// Функция открытия модального окна редактора формы
 async function openFormEditorModal() {
     if (!selectedInstitution) return;
     
     try {
         currentInstitutionName.textContent = selectedInstitution.name;
+        
         await renderFormFields(selectedInstitution);
+        
         formEditorModal.style.display = 'block';
     } catch (error) {
         console.error('Ошибка при загрузке формы:', error);
@@ -334,20 +333,23 @@ async function openFormEditorModal() {
     }
 }
 
+// Функция закрытия модального окна редактора формы
 function closeFormEditorModal() {
     formEditorModal.style.display = 'none';
 }
 
+// Функция отображения полей формы
 async function renderFormFields(institution) {
     formFieldsContainer.innerHTML = '<div class="loader">Загрузка полей формы...</div>';
 
     try {
+        // Запрашиваем с сервера данные о полях формы для конкретного учреждения
         const response = await apiService.getFormColumns(institution.id);
         console.log("Сервер вернул поля формы:", response);
 
         const rawFields = Array.isArray(response)
-        ? response
-        : (response?.columns || response?.data?.columns || []);
+            ? response 
+            : (response?.columns || response?.data?.columns || []); 
 
         if (rawFields.length === 0) {
             formFieldsContainer.innerHTML = `
@@ -358,36 +360,43 @@ async function renderFormFields(institution) {
             return;
         }
 
+        // Очищаем контейнер перед добавлением новых полей
         formFieldsContainer.innerHTML = '';
 
+        // Для каждого поля создаем элемент интерфейса
         rawFields.forEach((field, index) => {
             let fieldData = {};
 
             if (typeof field === 'string') {
                 fieldData = {
-                    label: field,
-                    type: 'text',
-                    required: false
+                    label: field,       
+                    type: 'text',       
+                    required: false     
                 };
-            } else {
+            } 
+
+            else {
                 fieldData = {
-                    label: field.label || '',
-                    type: field.type || 'text',
-                    required: field.required || false
+                    label: field.label || '',           
+                    type: field.type || 'text',         
+                    required: field.required || false  
                 };
             }
 
+            // Создаем DOM-элемент для поля формы
             const fieldElement = document.createElement('div');
             fieldElement.className = 'form-field';
+            
+            // Заполняем HTML-структуру поля
             fieldElement.innerHTML = `
                 <div class="form-group">
                     <label>Название поля:</label>
                     <input type="text" value="${fieldData.label}" class="field-label">
                 </div>
-
-                
                 <button class="remove-field-btn">Удалить</button>
             `;
+            
+            // Добавляем поле в контейнер
             formFieldsContainer.appendChild(fieldElement);
         });
     } catch (error) {
@@ -401,51 +410,48 @@ async function renderFormFields(institution) {
     }
 }
 
-
+// Функция добавления нового поля в форму
 function addFormField() {
+    // Создаем контейнер для нового поля
     const fieldElement = document.createElement('div');
     fieldElement.className = 'form-field';
+    
+    // Заполняем стандартную структуру нового поля
     fieldElement.innerHTML = `
         <div class="form-group">
             <label>Название поля:</label>
             <input type="text" class="field-label" placeholder="Введите название">
         </div>
-        <div class="form-group">
-            <label>Тип поля:</label>
-            <select class="field-type">
-                <option value="text">Текст</option>
-                <option value="date">Дата</option>
-                <option value="number">Число</option>
-                <option value="email">Email</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>
-                <input type="checkbox" class="field-required">
-                Обязательное поле
-            </label>
-        </div>
         <button class="remove-field-btn">Удалить</button>
     `;
+    
+    // Добавляем поле в контейнер формы
     formFieldsContainer.appendChild(fieldElement);
 }
 
+// Функция сохранения изменений формы
 async function saveFormFields() {
+    // Проверяем, выбрано ли учебное заведение
     if (!selectedInstitution) return;
 
-    const fields = [];
-    let hasEmptyField = false;
+    const fields = []; // Массив для хранения данных полей
+    let hasEmptyField = false; // Флаг наличия пустых полей
 
+    // Собираем данные всех полей формы
     document.querySelectorAll('.form-field').forEach(fieldEl => {
+        // Получаем значение названия поля (убираем пробелы по краям)
         const label = fieldEl.querySelector('.field-label').value.trim();
 
+        // Проверяем, заполнено ли поле
         if (!label) {
             hasEmptyField = true;
         } else {
+            // Добавляем название поля в массив
             fields.push(label);
         }
     });
 
+    // Проверяем наличие незаполненных полей
     if (hasEmptyField) {
         showCustomAlert('Пожалуйста, заполните все поля или удалите пустые перед сохранением.');
         return;
@@ -460,7 +466,9 @@ async function saveFormFields() {
 
     try {
         await apiService.updateFormColumns(selectedInstitution.id, fields);
+        
         closeFormEditorModal();
+        
         showCustomAlert('Форма успешно сохранена!');
     } catch (error) {
         console.error('Ошибка при сохранении формы:', error);
@@ -468,6 +476,7 @@ async function saveFormFields() {
     }
 }
 
+// Обработчик выхода
 document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     try {
         await fetch('/auth/api/logout', { 
@@ -500,7 +509,7 @@ async function deleteInstitution() {
             institutions = institutions.filter(m => m.id !== selectedInstitution.id);
             selectedInstitution = null;
             renderInstitutionsList();
-            actionPanel.classList.add('hidden'); // Скрываем панель действий
+            actionPanel.classList.add('hidden'); 
             showCustomAlert('Учебное заведение успешно удалено');
         } catch (error) {
             console.error('Ошибка удаления учебного заведения:', error);
@@ -516,6 +525,7 @@ saveFormBtn.addEventListener('click', saveFormFields);
 cancelFormBtn.addEventListener('click', closeFormEditorModal);
 closeFormBtn.addEventListener('click', closeFormEditorModal);
 
+// Обработчик загрузки шаблона
 document.getElementById('uploadTemplateBtn').addEventListener('click', () => {
     if (!selectedInstitution) {
         showCustomAlert("Сначала выберите учебное заведение.");
@@ -558,6 +568,7 @@ document.getElementById('templateUploadInput').addEventListener('change', functi
     });
 });
 
+// Обработчик генерации документа
 generateDocBtn.addEventListener('click', async () => {
     if (!selectedInstitution) {
         showCustomAlert("Выберите учебное заведение перед генерацией документа.");
@@ -588,6 +599,7 @@ generateDocBtn.addEventListener('click', async () => {
     }
 });
 
+// Функции для кастомных уведомлений
 function showCustomAlert(message) {
     document.getElementById('customAlertMessage').textContent = message;
     document.getElementById('customAlert').style.display = 'block';

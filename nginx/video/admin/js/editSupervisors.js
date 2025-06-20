@@ -21,7 +21,6 @@ class ApiService {
             throw new Error(`Ошибка сервера: ${response.status} - ${errorText}`);
         }
         
-        // Если не ожидаем JSON, просто возвращаем response
         return expectJson ? response.json() : response;
     }
 
