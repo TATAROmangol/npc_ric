@@ -28,7 +28,7 @@ func main() {
 	w := io.MultiWriter(os.Stdout, kafka)
 	l := logger.New(w)
 	ctx := context.Background()
-	logger.InitFromCtx(ctx, l)
+	ctx = logger.InitFromCtx(ctx, l)
 	logger.AppendCtx(ctx, "service", "generator")
 	l.InfoContext(ctx, "Config loaded", cfg)
 

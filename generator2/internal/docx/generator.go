@@ -26,24 +26,27 @@ func NewGenerator(cfg Config) (*Generator, error) {
 	return &Generator{}, nil
 }
 
-func (g *Generator) Generate(data []byte, table entity.Table, path string) error{
+func (g *Generator) Generate(data []byte, table entity.Table) ([]byte, error){
 	doc, err := document.Read(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
-		return err
+		return nil, fmt.Errorf("failed to read document: %w", err)
 	}
 
 	i := -1
-	find: for j, p := range doc.Paragraphs(){
+	builder := strings.Builder{}
+	for j, p := range doc.Paragraphs(){
 		for _, r := range p.Runs(){
-			if strings.Contains(r.Text(), WaterMark){
-				i = j
-				break find
-			}
+			builder.WriteString(r.Text())
 		}
+		if strings.Contains(builder.String(), WaterMark){
+			i = j
+			break 
+		}
+		builder.Reset()
 	}
 
 	if i == -1 {
-		return fmt.Errorf("watermark not found")
+		return nil, fmt.Errorf("watermark not found")
 	}
 
 
@@ -71,5 +74,10 @@ func (g *Generator) Generate(data []byte, table entity.Table, path string) error
    
 	}
 
-	return doc.SaveToFile(path)
+	buf := new(bytes.Buffer)
+	if err := doc.Save(buf); err != nil {
+  		return nil, fmt.Errorf("failed to save document: %w", err)
+ 	}
+
+	return buf.Bytes(), nil
 }

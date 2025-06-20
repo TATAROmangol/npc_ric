@@ -2,10 +2,6 @@ server {
     listen       ${NGINX_HTTP_PORT};
     server_name  localhost;
 
-    sub_filter_once off;
-    sub_filter 'http://localhost/' 'http://$server_name/'; 
-    sub_filter_types text/html application/javascript; 
-
     location /admin/api/ {
         proxy_pass http://forms:${FORMS_HTTP_PORT}/admin/;
     }

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"generator/pkg/logger"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -19,8 +18,8 @@ import (
 
 type Srv interface {
 	DeleteTemplate(ctx context.Context, id int) error
-	UploadTemplate(ctx context.Context, id int, file multipart.File) error
-	GenerateTemplate(ctx context.Context, id int) ([]byte, func(), error)
+	UploadTemplate(ctx context.Context, id int, file []byte) error
+	GenerateTemplate(ctx context.Context, id int) ([]byte, error)
 }
 
 type Handlers struct{
@@ -90,7 +89,14 @@ func (h *Handlers) UploadTemplate() http.Handler {
 			return
 		}
 
-		if err := h.srv.UploadTemplate(r.Context(), institutionId, file); err != nil {
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to read file", err)
+			http.Error(w, "Failed to read file: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := h.srv.UploadTemplate(r.Context(), institutionId, fileBytes); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to upload file", err)
 			http.Error(w, "Failed to upload file: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -113,16 +119,24 @@ func (h *Handlers) GenerateTemplate() http.Handler {
 			return
 		}
 
-		doc, remove, err := h.srv.GenerateTemplate(r.Context(), req.InstitutionId)
+		doc, err := h.srv.GenerateTemplate(r.Context(), req.InstitutionId)
 		if err != nil {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed to generate template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte(err.Error()))
 			return
 		}
-		defer remove()
 
-		w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%v", req.InstitutionId))
-    	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+		if len(doc) == 0 {
+			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "generated document is empty", nil)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+
+		w.Header().Set("Content-Disposition", 
+            fmt.Sprintf("attachment; filename=\"document_%d.docx\"", req.InstitutionId))
+        w.Header().Set("Content-Type", 
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        w.Header().Set("Content-Length", strconv.Itoa(len(doc)))
 
 		if _, err := io.Copy(w, bytes.NewReader(doc)); err != nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "failed return for download file", err)

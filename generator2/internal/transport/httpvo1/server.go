@@ -29,13 +29,13 @@ func New(cfg Config, m Midlewarer, h Handlerer) *Server {
 	mux.Use(m.Operation())
 	mux.Use(m.InitJsonContentType())
 	mux.Use(m.CheckAuth(cfg.AuthCookieName))
-	mux.Handle("/upload", h.UploadTemplate()).Methods(http.MethodPost)
+	mux.Handle("/templates/upload", h.UploadTemplate()).Methods(http.MethodPost)
 	mux.Handle("/template/{institution_id}", h.DeleteTemplate()).Methods(http.MethodDelete)
-	mux.Handle("/generate", h.GenerateTemplate()).Methods(http.MethodPost)
+	mux.Handle("/documents/generate", h.GenerateTemplate()).Methods(http.MethodPost)
 
 	return &Server{
 		srv: &http.Server{
-			Addr:    cfg.Host,
+			Addr:    cfg.Addr(),
 			Handler: mux,
 		},
 	}

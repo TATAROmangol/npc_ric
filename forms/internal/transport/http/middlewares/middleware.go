@@ -62,7 +62,7 @@ func (m *Middlewares) OperationMiddleware() func(h http.Handler) http.Handler {
 func (m *Middlewares) AuthMiddleware(cookieName string) func(h http.Handler) http.Handler {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("admin_token")
+			cookie, err := r.Cookie(cookieName)
 			if err != nil || cookie == nil {	
 				logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "cookie not found", err)
 				http.Error(w, "cookie not found", http.StatusUnauthorized)
