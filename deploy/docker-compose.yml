@@ -7,7 +7,9 @@ services:
         condition: service_started
       forms:
         condition: service_started
-      generator:
+      # generator:
+      #   condition: service_started
+      generator-go:
         condition: service_started
     environment:
       AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
@@ -120,8 +122,8 @@ services:
     depends_on:
       - kafka
     
-  generator:
-    container_name: generator
+  generator-go:
+    container_name: generator-go
     depends_on:
       mongodb:
         condition: service_started
