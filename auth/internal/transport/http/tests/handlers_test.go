@@ -27,6 +27,7 @@ func TestLoginHandler(t *testing.T) {
 
 	tests := []struct {
 		name         string
+		cookieName string
 		mockBehavior MockBehavior
 		req          hs.LoginRequest
 		want         string
@@ -34,6 +35,7 @@ func TestLoginHandler(t *testing.T) {
 	}{
 		{
 			name:       "valid credentials",
+			cookieName: "admin_token",
 			want:       "test",
 			wantStatus: http.StatusOK,
 			req: hs.LoginRequest{
@@ -46,6 +48,7 @@ func TestLoginHandler(t *testing.T) {
 		},
 		{
 			name:       "wrong password",
+			cookieName: "admin_token",
 			want:       "",
 			wantStatus: http.StatusBadRequest,
 			req: hs.LoginRequest{
@@ -56,6 +59,7 @@ func TestLoginHandler(t *testing.T) {
 		},
 		{
 			name:       "wrong password",
+			cookieName: "admin_token",
 			want:       "",
 			wantStatus: http.StatusBadRequest,
 			req: hs.LoginRequest{
@@ -66,6 +70,7 @@ func TestLoginHandler(t *testing.T) {
 		},
 		{
 			name:       "err token",
+			cookieName: "admin_token",
 			want:       "",
 			wantStatus: http.StatusInternalServerError,
 			req: hs.LoginRequest{
@@ -91,7 +96,7 @@ func TestLoginHandler(t *testing.T) {
 			ctx := logger.InitFromCtx(context.Background(), l)
 			req = req.WithContext(ctx)
 
-			hs.LoginHandler(loginer).ServeHTTP(rr, req)
+			hs.LoginHandler(loginer, tt.cookieName).ServeHTTP(rr, req)
 
 			if tt.wantStatus != rr.Code {
 				t.Errorf("LoginHandler status got %v, want %v", rr.Code, tt.wantStatus)
@@ -118,11 +123,13 @@ func TestLoginHandler(t *testing.T) {
 func TestLogoutHandler(t *testing.T) {
 	tests := []struct {
 		name         string
+		cookieName   string
 		cookie 	 *http.Cookie
 		wantCode int
 	}{
 		{
 			name: "all ok",
+			cookieName: "admin_token",
 			wantCode: http.StatusAccepted,
 			cookie: &http.Cookie{
 				Name:  "admin_token",
@@ -131,6 +138,7 @@ func TestLogoutHandler(t *testing.T) {
 		},
 		{
 			name: "cookie not found",
+			cookieName: "admin_token",
 			wantCode: http.StatusUnauthorized,
 			cookie: nil,
 		},
@@ -148,7 +156,7 @@ func TestLogoutHandler(t *testing.T) {
                 req.AddCookie(tt.cookie) 
             }
 
-			hs.LogoutHandler().ServeHTTP(rr, req)
+			hs.LogoutHandler(tt.cookieName).ServeHTTP(rr, req)
 			if rr.Code != tt.wantCode {
 				t.Errorf("LogoutHandler status got %v, want %v", rr.Code, tt.wantCode)
 			}

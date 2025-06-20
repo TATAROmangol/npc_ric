@@ -12,7 +12,7 @@ server {
         proxy_pass http://forms:${FORMS_HTTP_PORT}/forms/;
     }
     location /generator/api/ {
-        proxy_pass http://generator:${GEN_HTTP_PORT}/;
+        proxy_pass http://generator-go:${GEN_HTTP_PORT}/;
     }
 
     location /general/ {

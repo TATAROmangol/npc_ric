@@ -46,7 +46,7 @@ type Middlewares interface {
 	InitLoggerContextMiddleware(ctx context.Context) func(h http.Handler) http.Handler
 	InitJsonContentTypeMiddleware() func(h http.Handler) http.Handler
 	OperationMiddleware() func(h http.Handler) http.Handler
-	AuthMiddleware() func(h http.Handler) http.Handler
+	AuthMiddleware(cookieName string) func(h http.Handler) http.Handler
 }
 
 type HTTPServer struct{
@@ -61,7 +61,7 @@ func NewServer(ctx context.Context, cfg Config, h Handlers, m Middlewares) *HTTP
 	mux.Use(m.OperationMiddleware())
 
 	admin := mux.PathPrefix("/admin").Subrouter()
-	admin.Use(m.AuthMiddleware())
+	admin.Use(m.AuthMiddleware(cfg.AuthCookieName))
 	admin.Handle("/post/institution", h.PostInstitution()).Methods(http.MethodPost)
 	admin.Handle("/post/mentor", h.PostMentor()).Methods(http.MethodPost)
 	admin.Handle("/put/institution", h.PutInstitutionInfo()).Methods(http.MethodPut)

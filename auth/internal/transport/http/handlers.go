@@ -18,7 +18,7 @@ type Loginer interface {
 	Login(ctx context.Context, login, password string) (string, error)
 }
 
-func LoginHandler(srv Loginer) http.Handler {
+func LoginHandler(srv Loginer, cookieName string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
@@ -43,7 +43,7 @@ func LoginHandler(srv Loginer) http.Handler {
 
 		http.SetCookie(w, 
 		&http.Cookie{
-			Name: "admin_token",
+			Name: cookieName,
 			Value: token,
 			Path: "/",
 			Domain: "",
@@ -55,9 +55,9 @@ func LoginHandler(srv Loginer) http.Handler {
 	})
 }
 
-func LogoutHandler() http.Handler {
+func LogoutHandler(cookieName string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("admin_token")
+		cookie, err := r.Cookie(cookieName)
 		if err != nil || cookie == nil {
 			logger.GetFromCtx(r.Context()).ErrorContext(r.Context(), "not found cookie", nil)
 			http.Error(w, err.Error(), http.StatusUnauthorized)

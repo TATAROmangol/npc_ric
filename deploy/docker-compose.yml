@@ -9,6 +9,8 @@ services:
         condition: service_started
       generator:
         condition: service_started
+      # generator-go:
+      #   condition: service_started
     environment:
       AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
       AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
@@ -31,7 +33,6 @@ services:
       - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
       - ${NGINX_GRPC_AUTH_PORT}:${NGINX_GRPC_AUTH_PORT}
       - ${NGINX_GRPC_FORMS_PORT}:${NGINX_GRPC_FORMS_PORT}
-      - "443:443"
 
   auth:
     container_name: auth
@@ -52,6 +53,7 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${AUTH_HTTP_PORT}
       - ${AUTH_GRPC_PORT}
@@ -80,6 +82,7 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${FORMS_HTTP_PORT}
       - ${FORMS_TABLE_GRPC_PORT}
@@ -103,6 +106,7 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       PG_DB_NAME: ${PG_DB_NAME}
       PG_SSL: ${PG_SSL}
+      AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
     expose:
       - ${GEN_HTTP_PORT}
 
@@ -117,6 +121,51 @@ services:
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
     depends_on:
       - kafka
+    
+  # generator-go:
+  #   container_name: generator-go
+  #   depends_on:
+  #     mongodb:
+  #       condition: service_started
+  #     kafka:
+  #       condition: service_started
+  #   build:
+  #     context: ../generator2
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     GENERATOR_HTTP_HOST: ${GEN_HTTP_HOST}
+  #     GENERATOR_HTTP_PORT: ${GEN_HTTP_PORT}
+  #     GENERATOR_TABLE_GRPC_HOST: nginx
+  #     GENERATOR_TABLE_GRPC_PORT: ${NGINX_GRPC_FORMS_PORT}
+  #     GENERATOR_AUTH_GRPC_HOST: nginx
+  #     GENERATOR_AUTH_GRPC_PORT: ${NGINX_GRPC_AUTH_PORT}
+  #     MONGO_HOST: mongodb
+  #     MONGO_PORT: ${MONGO_PORT}
+  #     MONGO_USER: ${MONGO_USER}
+  #     MONGO_PASSWORD: ${MONGO_PASSWORD}
+  #     MONGO_DB_NAME: ${MONGO_DB_NAME}
+  #     MONGO_COLLECTION_NAME: ${MONGO_COLLECTION_NAME}
+  #     MONGO_AUTH_SOURCE: ${MONGO_AUTH_SOURCE}
+  #     AUTH_COOKIE_NAME: ${AUTH_COOKIE_NAME}
+  #     DOCX_LICENSE_KEY: ${DOCX_LICENSE_KEY}
+  #     KAFKA_PORT: ${KAFKA_PORT}
+  #     KAFKA_HOST: kafka
+  #     KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
+  #   ports:
+  #     - "${GEN_HTTP_PORT}:${GEN_HTTP_PORT}"
+  #   expose:
+  #     - ${GEN_HTTP_PORT}
+
+  mongodb:  
+    image: mongo:latest  
+    container_name: mongodb  
+    ports:
+      -  "${MONGO_PORT}:${MONGO_PORT}" 
+    volumes:  
+      - mongo_data:/data/db  
+    environment:  
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}  
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}  
 
   postgres:
     image: postgres:15-alpine
@@ -181,4 +230,6 @@ services:
 
 volumes:
   postgres_data:
+    driver: local
+  mongo_data:
     driver: local

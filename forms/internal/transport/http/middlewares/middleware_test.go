@@ -69,12 +69,14 @@ func TestMiddlewares_AuthMiddleware(t *testing.T) {
 
 	tests := []struct {
 		name   string
+		cookieName string
 		MockBehavior
 		cookie http.Cookie
 		want   int
 	}{
 		{
 			name: "valid cookie",
+			cookieName: "admin_token",
 			MockBehavior: func(val string) {
 				verifier.EXPECT().Verify(gomock.Any(), val).Return(true, nil)
 			},
@@ -86,6 +88,7 @@ func TestMiddlewares_AuthMiddleware(t *testing.T) {
 		},
 		{
 			name: "invalid cookie",
+			cookieName: "admin_token",
 			MockBehavior: func(val string) {
 				verifier.EXPECT().Verify(gomock.Any(), val).Return(false, nil)
 			},
@@ -97,6 +100,7 @@ func TestMiddlewares_AuthMiddleware(t *testing.T) {
 		},
 		{
 			name: "missing cookie",
+			cookieName: "admin_token",
 			MockBehavior: func(val string) {},
 			cookie: http.Cookie{},
 			want:   http.StatusUnauthorized,
@@ -123,7 +127,7 @@ func TestMiddlewares_AuthMiddleware(t *testing.T) {
 				w.WriteHeader(http.StatusOK)
 			})
 
-			middleware := m.InitLoggerContextMiddleware(ctx)((testHandler()(m.AuthMiddleware()(h))))
+			middleware := m.InitLoggerContextMiddleware(ctx)((testHandler()(m.AuthMiddleware(tt.cookieName)(h))))
 			middleware.ServeHTTP(rr, req)
 
 			if rr.Code != tt.want {
