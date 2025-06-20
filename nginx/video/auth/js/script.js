@@ -25,10 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Блокируем кнопку во время запроса
-        submitButton.disabled = true;
-        submitButton.textContent = 'Вход...';
-
         try {
             // Отправляем запрос на сервер
             const response = await fetch('/auth/api/login', {
@@ -49,12 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Успешная авторизация
             showAuthSuccess('Авторизация успешна! Перенаправление...');
-            
-            // Сохраняем токен (если используется JWT)
-            const data = await response.json();
-            if (data.token) {
-                localStorage.setItem('authToken', data.token);
-            }
             
             // Перенаправляем в админку
             setTimeout(() => {
