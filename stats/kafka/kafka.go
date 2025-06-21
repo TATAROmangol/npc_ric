@@ -20,7 +20,7 @@ func New(cfg Config) (*Kafka, error) {
 		cfg:  cfg,
 	}
 
-	err := k.connectWithRetry(5, 2*time.Second)
+	err := k.connectWithRetry(5, 10*time.Second)
 	if err != nil {
 		return nil, err
 	}
