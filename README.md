@@ -14,11 +14,11 @@
 ## Реализация:
 1. Rest: https://documenter.getpostman.com/view/44661306/2sB2xBDVvX
 2. Схема БД:
-...
-    <img src="./media_for_readme/схема_бд.png" alt="Схема базы данных" width="600"/>
-...
+    <div style="text-align: center;">
+        <img src="./media_for_readme/схема_бд.png" alt="Схема базы данных" width="800"/>
+    </div>
 3. Архитектура приложения:
-...
-    <img src="./media_for_readme/архитектура.png" alt="Архитектура приложения" width="600"/>
-...
+    <div style="text-align: center;">
+        <img src="./media_for_readme/архитектура.png" alt="Архитектура приложения" width="800"/>
+    </div>
 
