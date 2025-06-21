@@ -1,20 +1,16 @@
-Проект: Генератор договоров
+###Проект: Генератор договоров
 
-Описание:
+##Описание
 
-Запуск проекта:
+##Запуск проекта:
 
-git clone https://github.com/TATAROmangol/npc_ric 
-cd npc_ric/deploy
-docker-compose build
-docker-compose up -d
-
-
-Реализация:
-Rest: https://documenter.getpostman.com/view/44661306/2sB2xBDVvX
+```bash
+    git clone https://github.com/TATAROmangol/npc_ric 
+    cd npc_ric/deploy
+    docker-compose build
+    docker-compose up -d
+```
 
 
-
-
-
-
+##Реализация:
+#1) Rest: https://documenter.getpostman.com/view/44661306/2sB2xBDVvX
