@@ -110,6 +110,9 @@ services:
 
   stats:
     container_name: stats
+    depends_on:
+      kafka:
+        condition: service_started
     build:
       context: ../stats
       dockerfile: Dockerfile
@@ -117,8 +120,6 @@ services:
       KAFKA_PORT: ${KAFKA_PORT}
       KAFKA_HOST: kafka
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC}
-    depends_on:
-      - kafka
     
   # generator:
   #   container_name: generator
