@@ -35,7 +35,7 @@ func New(srv Srv) *Handlers {
 func (h *Handlers) DeleteTemplate() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		idStr := vars["id"]
+		idStr := vars["institution_id"]
 
 		id, err := strconv.Atoi(idStr)
 		if err != nil {

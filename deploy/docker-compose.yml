@@ -9,8 +9,6 @@ services:
         condition: service_started
       generator:
         condition: service_started
-      # generator-go:
-      #   condition: service_started
     environment:
       AUTH_HTTP_PORT: ${AUTH_HTTP_PORT}
       AUTH_GRPC_PORT: ${AUTH_GRPC_PORT}
@@ -122,12 +120,10 @@ services:
     depends_on:
       - kafka
     
-  # generator-go:
-  #   container_name: generator-go
+  # generator:
+  #   container_name: generator
   #   depends_on:
   #     mongodb:
-  #       condition: service_started
-  #     kafka:
   #       condition: service_started
   #   build:
   #     context: ../generator2
@@ -211,7 +207,7 @@ services:
     ports:
       - ${KAFKA_PORT}:${KAFKA_PORT}
     volumes:
-      - ./kafka_data:/bitnami/kafka
+      - kafka_data:/bitnami/kafka
     depends_on:
       - zookeeper
 
@@ -232,4 +228,6 @@ volumes:
   postgres_data:
     driver: local
   mongo_data:
+    driver: local
+  kafka_data:
     driver: local
