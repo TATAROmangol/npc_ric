@@ -1,8 +1,8 @@
-###Проект: Генератор договоров
+### Проект: Генератор договоров
 
-##Описание
+## Описание
 
-##Запуск проекта:
+## Запуск проекта:
 
 ```bash
     git clone https://github.com/TATAROmangol/npc_ric 
@@ -12,5 +12,5 @@
 ```
 
 
-##Реализация:
-#1) Rest: https://documenter.getpostman.com/view/44661306/2sB2xBDVvX
+## Реализация:
+1. Rest: https://documenter.getpostman.com/view/44661306/2sB2xBDVvX
