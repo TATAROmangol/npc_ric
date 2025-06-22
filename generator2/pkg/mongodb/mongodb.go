@@ -2,7 +2,6 @@ package mongodb
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,10 +20,6 @@ func NewMongoDB(ctx context.Context, cfg Config) (*MongoBD,error){
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.Addr()))
 	if err != nil {
 		return nil, err
-	}
-
-	if err = client.Ping(ctx, nil); err != nil {
-		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
 	db := client.Database(cfg.DBName).Collection(cfg.CollectionName)
